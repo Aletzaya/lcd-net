@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd" version="3.2" folio="2367" fecha="2014-09-26T08:32:45" sello="VmhKFO8xl4Ic1AV6RGeVF8klco93wF9kvhyR9ZPxfbMQWM8VPuVKxuJwAz+wC1XnKdPrBoJ+MZOP2pEQ9293a62uFVyTFEQDUWEzKPSZE1VIp00CQhxLYuy/8NZtjSq74gtUVaM+45smrG3+V1K7VQY2fLcPwvWTrpw4Ej3mfzc=" formaDePago="PAGO EN UNA SOLA EXHIBICION" noCertificado="00001000000202051282" certificado="MIIEnzCCA4egAwIBAgIUMDAwMDEwMDAwMDAyMDIwNTEyODIwDQYJKoZIhvcNAQEFBQAwggGVMTgwNgYDVQQDDC9BLkMuIGRlbCBTZXJ2aWNpbyBkZSBBZG1pbmlzdHJhY2nDs24gVHJpYnV0YXJpYTEvMC0GA1UECgwmU2VydmljaW8gZGUgQWRtaW5pc3RyYWNpw7NuIFRyaWJ1dGFyaWExODA2BgNVBAsML0FkbWluaXN0cmFjacOzbiBkZSBTZWd1cmlkYWQgZGUgbGEgSW5mb3JtYWNpw7NuMSEwHwYJKoZIhvcNAQkBFhJhc2lzbmV0QHNhdC5nb2IubXgxJjAkBgNVBAkMHUF2LiBIaWRhbGdvIDc3LCBDb2wuIEd1ZXJyZXJvMQ4wDAYDVQQRDAUwNjMwMDELMAkGA1UEBhMCTVgxGTAXBgNVBAgMEERpc3RyaXRvIEZlZGVyYWwxFDASBgNVBAcMC0N1YXVodMOpbW9jMRUwEwYDVQQtEwxTQVQ5NzA3MDFOTjMxPjA8BgkqhkiG9w0BCQIML1Jlc3BvbnNhYmxlOiBDZWNpbGlhIEd1aWxsZXJtaW5hIEdhcmPDrWEgR3VlcnJhMB4XDTEyMTAwMTE2MjE0MloXDTE2MTAwMTE2MjE0MlowgeAxKzApBgNVBAMTIkxBQk9SQVRPUklPIENMSU5JQ08gRFVSQU4gU0EgREUgQ1YxKzApBgNVBCkTIkxBQk9SQVRPUklPIENMSU5JQ08gRFVSQU4gU0EgREUgQ1YxKzApBgNVBAoTIkxBQk9SQVRPUklPIENMSU5JQ08gRFVSQU4gU0EgREUgQ1YxJTAjBgNVBC0THExDRDk2MDkwOVRXNSAvIERVQUc2NzEyMTlKMTUxHjAcBgNVBAUTFSAvIERVQUc2NzEyMTlITUNSR1IwOTEQMA4GA1UECxMHVEVYQ09DTzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA4XRqUJhGZkhMHO1zaEzOmN5GbD2CLGxn4nHbpbtYNa/IRb96j/VxihywBDpW1MBIVa0rZUlRa7GxLQpMidFGEnJO6AnYGg87Ez+Qy16FImWQgxA6WYLy3Dzq5KfHA3urC/yEoRpsZNooWtf5yrnjyyaYJaOYKNDuu0NRPsc97h8CAwEAAaMdMBswDAYDVR0TAQH/BAIwADALBgNVHQ8EBAMCBsAwDQYJKoZIhvcNAQEFBQADggEBAEquXOvZ7T4lguEQoBy3uO5Zcv1NmAbapCj90H3/FE/kQR0yrxIgaha6LeB5r0DINtz3n+Wi0o/p7ads/n79sLEesXi7ydl74jISy3YGeuGNhB59PUvG130OWipEsuROUYEupkG2TXjuCoYyBgkgH/n5uVmdMJPzobWzY/PUPUhHCgoMpiX/e3P2Bk/A2QGgEkTx/1I/KJ7+Gh2jXORgFqqWuMgbAUszaN6hAlDMG5STRTcdM7QBi/TyJPTM1i/FKiIt+9Iu11eD/EG+mJ3bKde1MfUQ/QaoRE0NBdKWdITcaXxtteUjZAB5HQb1+u5BmzjnTe5BTnPMNXJK0BeJNsA=" subTotal="1322.41" TipoCambio="1.00" Moneda="PESOS" total="1534" tipoDeComprobante="ingreso" metodoDePago="TARJETA" LugarExpedicion="TEXCOCO ESTADO DE MEXICO MEXICO" NumCtaPago="3597">
+  <cfdi:Emisor rfc="LCD960909TW5" nombre="LABORATORIO CLINICO DURAN S.A. DE C.V.">
+    <cfdi:DomicilioFiscal calle="FRAY PEDRO DE GANTE" noExterior="108" colonia="CENTRO" municipio="TEXCOCO" estado="ESTADO DE MEXICO" pais="MEXICO" codigoPostal="56100" />
+    <cfdi:RegimenFiscal Regimen="REGIMEN DE PERSONAS MORALES" />
+  </cfdi:Emisor>
+  <cfdi:Receptor rfc="XAXX010101000" nombre="MOSTRADOR">
+    <cfdi:Domicilio calle="SIN NOMBRE" noExterior="0" noInterior="0" colonia="SIN NOMBRE" municipio="SIN NOMBRE" estado="SIN NOMBRE" pais="MEXICO" codigoPostal="00000" />
+  </cfdi:Receptor>
+  <cfdi:Conceptos>
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="TPOS" descripcion="TP Y TPT " valorUnitario="113.793" importe="113.793" />
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="PBI" descripcion="PERFIL BIOQUIMICO I " valorUnitario="418.966" importe="418.966" />
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="AS" descripcion="AMONIO " valorUnitario="205.172" importe="205.172" />
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="BH" descripcion="BIOMETRIA HEMATICA " valorUnitario="75.8621" importe="75.8621" />
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="USGH" descripcion="ULTRASONIDO HEPATICO " valorUnitario="297.414" importe="297.414" />
+    <cfdi:Concepto cantidad="1" unidad="SERVICIO" noIdentificacion="PSA" descripcion="ANTIGENO PROSTATICO ESPECIFICO " valorUnitario="211.207" importe="211.207" />
+  </cfdi:Conceptos>
+  <cfdi:Impuestos totalImpuestosTrasladados="211.59">
+    <cfdi:Traslados>
+      <cfdi:Traslado impuesto="IVA" tasa="1600" importe="182.40" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/TimbreFiscalDigital/TimbreFiscalDigital.xsd" version="1.0" UUID="0000D33C-C2F3-42AC-BB4F-0C971DF830E7" FechaTimbrado="2014-09-26T08:33:47" selloCFD="VmhKFO8xl4Ic1AV6RGeVF8klco93wF9kvhyR9ZPxfbMQWM8VPuVKxuJwAz+wC1XnKdPrBoJ+MZOP2pEQ9293a62uFVyTFEQDUWEzKPSZE1VIp00CQhxLYuy/8NZtjSq74gtUVaM+45smrG3+V1K7VQY2fLcPwvWTrpw4Ej3mfzc=" noCertificadoSAT="00001000000201345708" selloSAT="c0MTBh/5hsOtPIX4v65PXVT6nQt+FHAhgdiDoesSGz7SG051/MGs6et6eTybErFnhGz4DT9IqILhDh5YvsR0jr/r/sTfDjQXu6a+6vwjxMRNu5ckErUF3Trt9dRTpqZtKXd1TT6O39qH62W5GXiPsdOUiXCblcxgX0VNnBT8OTo=" />
+  </cfdi:Complemento>
+</cfdi:Comprobante>
