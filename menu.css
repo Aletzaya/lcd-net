@@ -1,0 +1,444 @@
+@charset "utf-8";
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 14/08/2020, 10:35:43 AM
+    Author     : Alejandro Ayala
+*/
+
+nav ul{
+    list-style: none;
+    paddin:0;
+}
+nav li {
+    line-height: 2.2rem;
+    position: relative;
+
+}
+
+.mmenu ul {
+    position:absolute;
+    left: -45px;
+}
+nav li ul > li {
+    width: 130px;
+    border-radius:5px;
+}
+nav a {
+    color: #ddd;
+    display: block;
+    padding: 0 1em;
+    text-decoration:none;
+    transition: .4s;
+    border-radius:5px;
+}
+
+nav ul li ul li a:hover {
+    background: rgba(0,0,0,.3);
+    height: 30px;
+}
+nav ul li ul li a:active {
+    background: rgb(255,255,255);
+    transition: .2s;
+}
+
+/*Primer nivel */
+.mmenu {
+    background: #333;
+    diplay:table;
+    width: 90%;
+}
+
+.mmenu > li {
+    float:left;
+    width: 23%;
+    display: inline-grid;
+}
+
+.BarraPrincipal{
+    padding-left: 10px;
+}
+/*Segundo nivel*/
+nav li li {
+    background: #2c8e3c;
+    max-height: 0;
+    transition: 0.2s;
+    height: 30px;
+    margin-left: 25px;
+    font-family: Monospace;
+    font-size: 10px;
+    transition: all 1s;
+    overflow: hidden;
+    width: 200px;   
+    border: solid 0px #7FB3D5;
+}
+nav li:hover li {
+    max-height: 1500px;
+    overflow: visible;
+    transition: 1s;
+    border: solid 1px #1F618D;
+    border-style: solid;
+}
+nav > ul > li > ul {
+    top: 99%;
+
+}
+.ssbm:hover {
+    background: rgba(0,0,0,.3);
+    border-radius: 2px 2px 2px 2px;
+    transition: .8s;
+    border:solid 0px;
+    border-style: visible;
+}
+.sbmnu {
+    margin-left: 6px;
+    font-family: arial, verdana, helvetica, sans-serif;
+    font-size: 14px;
+    color: #000;
+    text-decoration: none;
+}
+.ssbm:hover > a {
+    margin-left: 6px;
+    font-family: sans-serif,arial,serif;
+    font-size: 14px;
+    transition: .8s;
+    color: #fff;
+    text-decoration: none;
+    font-weight: none;
+}
+.ssbm2:hover {
+    border-radius: 2px 2px 2px 2px;
+    transition: .8s;
+    border:solid 0px;
+    border-style: visible;
+}
+.ssbm2:hover > a {
+    margin-left: 6px;
+    font-family: sans-serif,arial,serif;
+    font-size: 14px;
+    transition: .8s;
+    color: #fff;
+    text-decoration: none;
+    font-weight: none;
+}
+.Orilla{
+    border:#000 1px solid;
+    border-radius: 4em;
+    height:400px;
+    position: relative ;
+    border-collapse: collapse;
+    background-color: rgba(0,0,0,.2);
+    border-radius: 10px 10px 10px 10px;
+}
+/*Coloreamos fondo de menu principal verde a claro*/
+table .fondo{
+    background: linear-gradient(to top, #2C762B 0%,#50A74E 30%,#94D193 55%,#ABEBC6 100%);
+}
+
+table#BarraPrincipal{
+    width:100% ;
+    padding: 0px;
+    border-spacing: 0px;
+    border-bottom-size: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: white; 
+}
+/*Quitamos espacios y margenes en todas las subtblas para submenu*/
+table#Tabla_1,#Tabla_2,#Tabla_3,#Tabla_4{
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+#logoPrincipal{
+    background: url("lib/DuranNvoBk.png");
+    width: 100%;
+    max-width: 325px;
+    height:90px;
+    background-size:70%;
+    background-repeat: no-repeat;
+    background-position-y: center;
+}
+
+/* Asignamos imagenes a nuestros div de menu principal*/
+#recepcion1{
+    background: url("images/btn_recepcion-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#recepcion1:hover{
+    background: url("images/btn_recepcion-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#catalogo1{
+    background: url("images/btn_catalogos-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#catalogo1:hover{
+    background: url("images/btn_catalogos-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#movil1{
+    background: url("images/btn_moviles-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:67%;
+    background-repeat: no-repeat;
+}
+#movil1:hover{
+    background: url("images/btn_moviles-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:67%;
+    background-repeat: no-repeat;
+}
+#reporte1{
+    background: url("images/btn_reportes-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#reporte1:hover{
+    background: url("images/btn_reportes-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#reporte2{
+    background: url("images/btn_reportes-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#reporte2:hover {
+    background: url("images/btn_reportes-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#promocion1 {
+    background: url("images/btn_promocion-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;    
+}
+
+#promocion1:hover {
+    background: url("images/btn_promocion-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;    
+}
+
+#administracion1{
+    background: url("images/btn_administracion-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+#administracion1:hover{
+    background: url("images/btn_administracion-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+#procesos_muestra{
+    background: url("images/btn_procesos-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#procesos_muestra:hover{
+    background: url("images/btn_procesos-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#procesos_muestra1{
+    background: url("images/btn_procesos-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+#procesos_muestra1:hover{
+    background: url("images/btn_procesos-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#recursosh1{
+    background: url("images/btn_recursosh-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+#recursosh1:hover{
+    background: url("images/btn_recursosh-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+#productividad{
+    background: url("images/productividad.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#respm{
+    background: url("images/btn_respaldo-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+#respm:hover{
+    background: url("images/btn_respaldo-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    max-height: 250px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+#usuarios0{
+    background: url("images/btn_usuarios-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+#usuarios0:hover{
+    background: url("images/btn_usuarios-hover.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:68%;
+    background-repeat: no-repeat;
+}
+
+.aunNullo{
+    background: url("images/btn_respaldo-1.png");
+    background-position-y: bottom;
+    width: 100%;
+    max-width: 115px;
+    height:86px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+/*Espacios libres en el menu principal*/
+#libre0{
+    background-position-y: bottom;
+    width: 100%;
+    height:90px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#libre1{
+    background-position-y: bottom;
+    width: 100%;
+    height:90px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#libre2 {
+    background-position-y: bottom;
+    width: 100%;
+    height:90px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}
+
+#libre3 {
+    background-position-y: bottom;
+
+    height:90px;
+    background-size:75%;
+    background-repeat: no-repeat;
+}

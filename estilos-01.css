@@ -1,0 +1,82 @@
+body{background-color:  #afafaf;}
+
+ul li {
+	list-style: none;
+	display: inline-block;
+  	margin: 0 -3px 0 0;
+}
+ul li a {
+	padding: 7px 15px;
+	text-transform: uppercase;
+	text-decoration: none; 
+	color: #fff;
+}
+ul li:hover a {
+	text-decoration: underline; 
+  	color: #fff;
+}
+ul li ul {
+	display: none;
+  	width: 100%;
+}
+ul li:hover ul {
+	position: absolute;
+	display: block;
+	left:0px;
+  	top:100px;
+  	width: 100%;
+}
+ul li:hover li {
+	background-color: #FFF;
+	display: inline-block;
+  	margin: 0 -3px 0 0;
+}
+ul li:hover li a {
+	text-decoration: underline;
+}
+ul li li a:hover {
+	color: #fff;
+  background: #999;
+}
+a.recepcion{background-image: url('images/btn_recepcion-1.png');display: block; float:left; height:80px; opacity: .5; width: 90px; margin:0; padding: 0; border:0;}
+a.recepcion:hover{background-image: url('images/btn_recepcion-hover.png'); opacity: 1;}
+a.catalogos{background-image: url('images/btn_catalogos-1.png');display: block; float:left; height:80px; opacity: .5; width: 90px; margin:0; padding: 0; border:0;}
+a.catalogos:hover{background-image: url('images/btn_catalogos-hover.png'); opacity: 1;}
+a.procesos{background-image: url('images/btn_procesos-1.png');display: block; float:left; height:80px; opacity: .5; width: 90px; margin:0; padding: 0; border:0;}
+a.procesos:hover{background-image: url('images/btn_procesos-hover.png'); opacity: 1;}
+a.reportes{background-image: url('images/btn_reportes-1.png');display: block; float:left; height:80px; opacity: .5; width: 90px; margin:0; padding: 0; border:0;}
+a.reportes:hover{background-image: url('images/btn_reportes-hover.png'); opacity: 1;}
+#two-level-recepcion{position:absolute; margin-left: 180px; }
+#two-level-catalogos{position:absolute; margin-left: 180px; }
+#two-level-procesos {position:absolute; margin-left: 180px; }
+#two-level-reportes {position:absolute; margin-left: 180px; }
+/*Right Menu*/
+#main-menu #right-menu{display: block; float:right; margin:0; padding:0; border:0;  width: 33%; text-align: right; height: 90px;}
+#main-menu #right-menu ul{display: block; margin:1em auto; padding:0, border:0;}
+a#cotizador{background-image: url('images/btn_cotizador.png');display: block; height: 55px; opacity: .5; width: 50px;}
+a#cotizador:hover{background-image: url('images/btn_cotizador.png');display: block; height: 55px; opacity: 1; width: 50px;}
+a#factura{background-image: url('images/btn_factura.png');display: block; height: 55px; opacity: .5; width: 50px;}
+a#factura:hover{background-image: url('images/btn_factura.png');display: block; height: 55px; opacity: 1; width: 50px;}
+a#entrega-resultado{background-image: url('images/btn_entrega-resultado.png');display: block; height: 55px; opacity: .5; width: 50px;}
+a#entrega-resultado:hover{background-image: url('images/btn_entrega-resultado.png');display: block; height: 55px; opacity: 1; width: 50px;}
+a#entrega-caja{background-image: url('images/btn_entrega-caja.png');display: block; height: 55px; opacity: .5; width: 50px;}
+a#entrega-caja:hover{background-image: url('images/btn_entrega-caja.png');display: block; height: 55px; opacity: 1; width: 50px;}
+#logo, #menu, #right-menu{display: inline-block; margin: 0px;  padding:0px; width: 33%;}
+#right-menu ul{margin:0px; padding: 0; }
+#bottom-banner{display: block; float: left; width:100%; height: 90px; margin: 0; padding: 0; border:0;}
+#bottom-banner img{display:inline-block; width: 33%; margin: 0; padding: 0; border:0;}
+
+.recepcion a {
+	display:block;
+	height:42px;
+	background-repeat:no-repeat;
+}
+.recepcion a:hover { background-position: 0 -86px;
+	float: center;}
+	
+.recepcion a#recepcion {background-image: url(images/BarraVdeIcon1D.jpg)}	
+.recepcion a#catalogos {background-image: url(images/BarraVdeIcon2D.jpg)}
+.recepcion a#procesos {background-image: url(images/BarraVdeIcon3D.jpg)}	
+.recepcion a#reportes {background-image: url(images/BarraVdeIcon4D.jpg)}	
+
+
