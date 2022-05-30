@@ -9,11 +9,17 @@ require ("lib/lib.php");
 require ("CFDIComboBoxes.php");
 require_once 'class.phpmailer.php';
 
-require_once ('cfdi33/SelloCFDI.php');
-require_once ('cfdi33/Certificates/SATCertificates.php');
-require_once ('cfdi33/pac/PACServiceFactory.php');
-require_once ('cfdi33/pac/PACFactory.php');
-require_once ('cfdi33/pac/PAC.php');
+//require_once ('cfdi33/SelloCFDI.php');
+//require_once ('cfdi33/Certificates/SATCertificates.php');
+//require_once ('cfdi33/pac/PACServiceFactory.php');
+//require_once ('cfdi33/pac/PACFactory.php');
+//require_once ('cfdi33/pac/PAC.php');
+
+require_once ('com/softcoatl/cfdi/ComprobanteResolver.php');
+require_once ('com/softcoatl/cfdi/SelloCFDI.php');
+require_once ('com/softcoatl/cfdi/utils/pac/PACServiceFactory.php');
+require_once ('com/softcoatl/security/commons/SATCertificates.php');
+
 require_once ('data/CiaDAO.php');
 require_once ('data/ClientesDAO.php');
 require_once ('data/FcDAO.php');
@@ -22,12 +28,13 @@ require_once ('data/FacturaDetisa.php');
 
 require_once ("lib/PDFGenerator.php");
 
-use com\softcoatl\cfdi\v33\schema\Comprobante as Comprobante;
+//use com\softcoatl\cfdi\v33\schema\Comprobante as Comprobante;
 
-Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\\TimbreFiscalDigital");
-Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\Pagos");
-Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\INE");
+//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\\TimbreFiscalDigital");
+//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\Pagos");
+//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\INE");
 //Comprobante::registerAddenda("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\addenda\\Observaciones");
+
 $queryParameters = array();
 foreach ($_REQUEST as $key => $value) {
     $queryParameters[$key] = $value;
