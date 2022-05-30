@@ -30,12 +30,12 @@ $logout = "https://" . $_SERVER['HTTP_HOST'] . "/lcd-net/logout.php"; // Path to
 
 // DB SETTINGS
 
-$dbhost = "127.0.0.1";	// Change this to the proper DB Host name
+$dbhost = "localhost";	// Change this to the proper DB Host name
 
-$dbusername = "u938386532_root"; 	// Change this to the proper DB User
+$dbusername = "root"; 	// Change this to the proper DB User
 
-$dbpass = "Lcd9623299";	// Change this to the proper DB User password
+$dbpass = "det15a";	// Change this to the proper DB User password
 
-$dbname	= "u938386532_lcd"; 	// Change this to the proper DB Name
+$dbname	= "lcd"; 	// Change this to the proper DB Name
 
 ?>

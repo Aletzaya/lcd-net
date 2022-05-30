@@ -4,13 +4,13 @@ class auth{
 
 	// CHANGE THESE VALUES TO REFLECT YOUR SERVER'S SETTINGS
 
-	var $HOST = "127.0.0.1";	// Change this to the proper DB HOST
+	var $HOST = "localhost";	// Change this to the proper DB HOST
 
-	var $USERNAME = "u938386532_root";	// Change this to the proper DB USERNAME
+	var $USERNAME = "root";	// Change this to the proper DB USERNAME
 
-	var $PASSWORD = "Lcd9623299";	// Change this to the proper DB USER PASSWORD
+	var $PASSWORD = "det15a";	// Change this to the proper DB USER PASSWORD
 
-	var $DBNAME = "u938386532_lcd";	// Change this to the proper DB NAME
+	var $DBNAME = "lcd";	// Change this to the proper DB NAME
 
 
 	// AUTHENTICATE

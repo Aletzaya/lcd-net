@@ -8,7 +8,7 @@ function conectarse() {
 
     $Coneccion = $_SESSION[Usr][6];
 
-    if (!($link = mysql_connect("127.0.0.1", "u938386532_root", "Lcd9623299"))) {
+    if (!($link = mysql_connect("localhost", "root", "det15a"))) {
 
         //setcookie ("USERNAME", "");
         //setcookie ("PASSWORD", "");	
@@ -19,7 +19,7 @@ function conectarse() {
         //exit();
     }
 
-    if (!mysql_select_db("u938386532_lcd", $link)) {
+    if (!mysql_select_db("lcd", $link)) {
 
         setcookie("USERNAME", "");
         setcookie("PASSWORD", "");
