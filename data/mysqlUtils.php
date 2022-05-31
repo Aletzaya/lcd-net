@@ -1,4 +1,5 @@
 <?php
+
 /**
  * mysqlUtils
  * © 2017, Softcoatl
@@ -18,15 +19,21 @@
  */
 function getConnection() {
 
+//    $dataBaseConf = (object) array(
+//        'host' => '127.0.0.1',
+//        'username' => 'u938386532_root',
+//        'pass' => 'Lcd9623299',
+//        'database' => 'u938386532_lcd'
+//    );
     $dataBaseConf = (object) array(
-        'host' => '127.0.0.1',
-        'username' => 'u938386532_root',
-        'pass' => 'Lcd9623299',
-        'database' => 'u938386532_lcd'
+                'host' => 'localhost',
+                'username' => 'root',
+                'pass' => 'det15a',
+                'database' => 'lcd'
     );
     $dbConn = new mysqli($dataBaseConf->host, $dataBaseConf->username, $dataBaseConf->pass);
 
-    if ($dbConn->connect_errno>0) {
+    if ($dbConn->connect_errno > 0) {
         if (mysqli_connect_errno()) {
             throw new Exception("Error conectando con base de datos <br/>" . utf8_encode(mysqli_connect_error()));
         }
@@ -36,8 +43,7 @@ function getConnection() {
             throw new Exception("Error seleccionando base de datos <br/>" . utf8_encode(mysqli_error($dbConn)));
         }
     }
-    if (!$psSetLocale = $dbConn->prepare("SET lc_time_names = 'es_MX'")
-            || !$psSetLocale->execute()) {
+    if (!$psSetLocale = $dbConn->prepare("SET lc_time_names = 'es_MX'") || !$psSetLocale->execute()) {
         if (mysqli_errno($dbConn)) {
             throw new Exception("Error configurando base de datos <br/>" . utf8_encode(mysqli_error($dbConn)));
         }
@@ -48,5 +54,7 @@ function getConnection() {
         }
     }
     return $dbConn;
-}//getConnection
+}
+
+//getConnection
 
