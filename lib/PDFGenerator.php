@@ -1,7 +1,7 @@
 <?php
 
-require_once ("pdf/PDFTransformer.php");
-require_once ("pdf/PDFTransformerRP.php");
+require_once ("cfdi/pdf/PDFTransformer.php");
+//require_once ("pdf/PDFTransformerRP.php");
 
 /**
  * Description of PDFGenerator
@@ -9,34 +9,26 @@ require_once ("pdf/PDFTransformerRP.php");
  * @author rolando
  */
 class PDFGenerator {
-   
-    /**
-     * 
-     * @param \cfdi33\Comprobante $factura
-     * @param int $tipo
-     */
+
+    private static function getTipo($tipo) {
+        switch ($tipo) {
+            case 2: return "Recibo de Arrendamiento";
+            case 3: return "Recibo de Honorarios";
+            case 4: return "Nota de Crédito";
+            case 5: return "Recibo de Pagos";
+            case 7: return "Carta Porte";
+        }
+        return "Factura";
+    }
+
     public static function generate($factura, $tipo, $rfc, $addrEmisor = NULL, $addrReceptor = NULL) {
 
-        error_log("Generando PDF para " . $factura->getTimbreFiscalDigital()->getUUID());
-        if ($factura->getVersion()=="3.3") {
-            switch ($tipo) {
-            case 2:
-                $cTipo = 'Recibo de Arrendamiento'; break;
-            case 4:
-                $cTipo = 'Nota de Crédito'; break;
-            case 3:
-                $cTipo = 'Recibo de Honorarios'; break;
-            default:
-                $cTipo = 'Factura'; break;
-            }
-
-            $logoName = "img/logo.png";
-
-            return $tipo != 5 ? 
-                    PDFTransformer::getPDF($factura, $cTipo, "S", file_get_contents($logoName), "./", $addrEmisor, $addrReceptor):
-                    PDFTransformerRP::getPDF($factura, "Recibo de Pago", "S", file_get_contents($logoName), "./", $addrEmisor, $addrEmisor);
+        if ($factura->getVersion() !== "3.2") {
+            error_log("Generando PDF para " . $factura->getTimbreFiscalDigital()->getUUID());
+            return (new PDFTransformer())->getPDF($factura, self::getTipo($tipo), "S", '', "./", $addrEmisor, $addrReceptor);
         }
 
         return false;
     }
+
 }

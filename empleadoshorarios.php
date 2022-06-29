@@ -20,13 +20,33 @@ $Fecha = date("Y-m-d H:m:s");
 $Msj = $_REQUEST["Msj"];
 
 if ($_REQUEST["Boton"] === "Guardar") {
-    $Insert = "INSERT INTO horariosTrabajo (empleado,horario,entrada,salida) "
-            . "VALUES ('" . $busca . "','" . $_REQUEST["DiaSemana"] . "','" .
-            $_REQUEST["HoraEntrada"] . "','" . $_REQUEST["HoraSalida"] . "');";
-    if (!mysql_query($Insert)) {
-        $Msj = "Error en sintaxis: " . $Insert;
+    if ($_REQUEST["DiaSemana"] == 7) {
+        for ($i = 0; $i <= 5; $i++) {
+            $Insert = "INSERT INTO horariosTrabajo (empleado,horario,entrada,salida) "
+                    . "VALUES ('" . $busca . "','" . $i . "','" .
+                    $_REQUEST["HoraEntrada"] . "','" . $_REQUEST["HoraSalida"] . "');";
+            if (!mysql_query($Insert)) {
+                $Msj = "Error en sintaxis: " . $Insert;
+            }
+        }
+    } elseif ($_REQUEST["DiaSemana"] == 9) {
+        for ($i = 0; $i <= 5; $i++) {
+            $Insert = "INSERT INTO horariosTrabajo (empleado,horario,entrada,salida) "
+                    . "VALUES ('" . $busca . "','" . $i . "','" .
+                    $_REQUEST["HoraEntrada"] . "','" . $_REQUEST["HoraSalida"] . "');";
+            if (!mysql_query($Insert)) {
+                $Msj = "Error en sintaxis: " . $Insert;
+            }
+        }
+    } else {
+        $Insert = "INSERT INTO horariosTrabajo (empleado,horario,entrada,salida) "
+                . "VALUES ('" . $busca . "','" . $_REQUEST["DiaSemana"] . "','" .
+                $_REQUEST["HoraEntrada"] . "','" . $_REQUEST["HoraSalida"] . "');";
+        if (!mysql_query($Insert)) {
+            $Msj = "Error en sintaxis: " . $Insert;
+        }
+        $Msj = "Registro ingreado con exito!";
     }
-    $Msj = "Registro ingreado con exito!";
     AgregaBitacoraEventos($Gusr, '/R.Humanos/Empleados/Agrega registro en horario', "horariosTrabajo", $Fecha, $busca, $Msj, "empleadoshorarios.php");
 } else if ($_REQUEST["Op"] === "EliminaHorario") {
     $Delete = "DELETE FROM horariosTrabajo WHERE id = " . $_REQUEST["Delete"];
@@ -109,7 +129,6 @@ require ("config.php");          //Parametros de colores;
                                             <option value="5">Sabado</option>
                                             <option value="6">Domingo</option>
                                             <option value="7">Lunes-Sabado</option>
-                                            <option value="8">Sabado-Domingo</option>
                                             <option value="9">Lunes -Domingo</option>
                                         </select>
                                         Hora de entrada:

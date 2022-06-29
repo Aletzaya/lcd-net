@@ -19,7 +19,7 @@ class Addenda implements CFDIElement, Comprobante\Addenda {
     /** @var */
     private $any = array();
 
-    public function getAny(): array {
+    public function getAny() {
         return $this->any;
     }
 

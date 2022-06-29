@@ -25,11 +25,11 @@ class Impuestos implements CFDIElement, Comprobante\Impuestos {
     private $TotalImpuestosRetenidos;
     private $TotalImpuestosTrasladados;
 
-    public function getRetenciones(): ?Comprobante\Impuestos\Retenciones {
+    public function getRetenciones() {
         return $this->Retenciones;
     }
 
-    public function getTraslados(): ?Comprobante\Impuestos\Traslados {
+    public function getTraslados() {
         return $this->Traslados;
     }
 
@@ -137,7 +137,7 @@ class Retenciones implements CFDIElement, Comprobante\Impuestos\Retenciones {
     /** @var Retenciones\Retencion[] */
     private $Retencion = array();
 
-    public function getRetencion(): array {
+    public function getRetencion() {
         return $this->Retencion;
     }
 
@@ -164,7 +164,7 @@ class Traslados implements CFDIElement, Comprobante\Impuestos\Traslados {
     /** @var Traslados\Traslado[] */
     private $Traslado = array();
 
-    public function getTraslado(): array {
+    public function getTraslado() {
         return $this->Traslado;
     }
 

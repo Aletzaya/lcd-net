@@ -23,20 +23,20 @@ interface Comprobante {
     public function setSubTotal($total);
     public function setTotal($total);
 
-    public function getTimbreFiscalDigital(): ?complemento\tfd\TimbreFiscalDigital;
+    public function getTimbreFiscalDigital();
     public function getOriginalBytes();
     public function getTFDOriginalBytes();
     public function getValidationExpression();
     public function getValidationURL();
 
-    public function getComplemento(): ?Comprobante\Complemento;
-    public function getAddenda(): ?Comprobante\Addenda;
+    public function getComplemento();
+    public function getAddenda();
 
-    public function getCfdiRelacionados(): array;
-    public function getEmisor(): ?Comprobante\Emisor;
-    public function getReceptor(): ?Comprobante\Receptor;
-    public function getConceptos(): ?Comprobante\Conceptos;
-    public function getImpuestos(): ?Comprobante\Impuestos;
+    public function getCfdiRelacionados();
+    public function getEmisor();
+    public function getReceptor();
+    public function getConceptos();
+    public function getImpuestos();
 
     public function setComplemento(Comprobante\Complemento $complemento);
     public function setAddenda(Comprobante\Addenda $addenda);
@@ -49,14 +49,14 @@ interface Comprobante {
 
     public function schemaValidate();
 
-    public function asXML($root): \DOMDocument;
+    public function asXML($root);
 }
 
 namespace com\softcoatl\cfdi\Comprobante;
 
 interface CfdiRelacionados {
 
-    public function getCfdiRelacionado(): array;
+    public function getCfdiRelacionado();
     public function getTipoRelacion();
     public function setCfdiRelacionado(array $CfdiRelacionado);
     public function setTipoRelacion($TipoRelacion);
@@ -84,15 +84,15 @@ interface Receptor {
 
 interface Conceptos {
 
-    public function getConcepto(): array;
+    public function getConcepto();
     public function setConcepto(array $Concepto);
     public function addConcepto(Conceptos\Concepto $Concepto);
 }
 
 interface Impuestos {
 
-    public function getTraslados(): ?Impuestos\Traslados;
-    public function getRetenciones(): ?Impuestos\Retenciones;
+    public function getTraslados();
+    public function getRetenciones();
     public function setTraslados(Impuestos\Traslados $Traslados);
     public function setRetenciones(Impuestos\Retenciones $Retenciones);
 
@@ -103,12 +103,12 @@ interface Impuestos {
 }
 
 interface Complemento {
-    public function getAny(): array;
+    public function getAny();
     public function addAny(\com\softcoatl\cfdi\CFDIElement $any);
 }
 
 interface Addenda {
-    public function getAny(): array;
+    public function getAny();
     public function addAny(\com\softcoatl\cfdi\CFDIElement $any);
 }
 
@@ -116,7 +116,7 @@ namespace com\softcoatl\cfdi\Comprobante\Conceptos;
 
 interface Concepto {
 
-    public function getImpuestos(): ?Concepto\Impuestos;
+    public function getImpuestos();
     public function getClaveProdServ();
     public function getNoIdentificacion();
     public function getCantidad();
@@ -149,8 +149,8 @@ namespace com\softcoatl\cfdi\Comprobante\Conceptos\Concepto;
 
 interface Impuestos {
 
-    public function getTraslados(): ?Impuestos\Traslados;
-    public function getRetenciones(): ?Impuestos\Retenciones;
+    public function getTraslados();
+    public function getRetenciones();
     public function setTraslados(Impuestos\Traslados $Traslados);
     public function setRetenciones(Impuestos\Retenciones $Retenciones);
 }
@@ -159,13 +159,13 @@ namespace com\softcoatl\cfdi\Comprobante\Conceptos\Concepto\Impuestos;
 
 interface Traslados {
     
-    public function getTraslado(): array;
+    public function getTraslado();
     public function setTraslado(array $Traslado);
 }
 
 interface Retenciones {
     
-    public function getRetencion(): array;
+    public function getRetencion();
     public function setRetencion(array $Retencion);
 }
 
@@ -173,12 +173,12 @@ namespace com\softcoatl\cfdi\Comprobante\Impuestos;
 
 interface Traslados {
     
-    public function getTraslado(): array;
+    public function getTraslado();
     public function setTraslado(array $Traslado);
 }
 
 interface Retenciones {
     
-    public function getRetencion(): array;
+    public function getRetencion();
     public function setRetencion(array $Retencion);
 }

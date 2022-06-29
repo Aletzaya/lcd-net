@@ -19,7 +19,7 @@ class Complemento implements CFDIElement, Comprobante\Complemento {
     /** @var */
     private $any = array();
 
-    public function getAny(): array {
+    public function getAny() {
         return $this->any;
     }
 

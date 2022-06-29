@@ -12,22 +12,25 @@
 
 namespace com\detisa\omicrom {
 
-    require_once ('cfdi33/Comprobante.php');
-    require_once ('FacturaDAO.php');
+    require_once ('cfdi/com/softcoatl/cfdi/Comprobante.php');
+    require_once ('FacturaLcdDAO.php');
     require_once ('mysqlUtils.php');
 
-    class FacturaDetisa {
+    class FacturaLcd {
         /* @var $facturaDAO FacturaDAO */
 
         private $facturaDAO;
-        /* @var $comprobante \cfdi33\Comprobante */
+        /* @var $comprobante \com\softcoatl\cfdi\v40\schema\Comprobante40 */
         private $comprobante;
-        /* @var $comprobanteTimbrado \cfdi33\Comprobante */
+        /* @var $comprobanteTimbrado \com\softcoatl\cfdi\v40\schema\Comprobante40 */
         private $comprobanteTimbrado;
+        private $xmlTimbrado;
+        private $representacionImpresa;
+        private $idFactura;
 
         function __construct($idFactura) {
-
-            $this->facturaDAO = new FacturaDAO($idFactura);
+            $this->idFactura = $idFactura;
+            $this->facturaDAO = new FacturaLcdDAO($idFactura);
             $this->comprobante = $this->facturaDAO->getComprobante();
         }
 
@@ -49,16 +52,19 @@ namespace com\detisa\omicrom {
             $this->comprobanteTimbrado = $comprobanteTimbrado;
         }
 
-        function update() {
+        function setRepresentacionImpresa($representacionImpresa) {
+            $this->representacionImpresa = $representacionImpresa;
+        }
 
-            $this->facturaDAO->updateFC($this->comprobanteTimbrado->getFolio(), $this->comprobanteTimbrado->getTimbreFiscalDigital()->getUUID());
-            $this->facturaDAO->updateRM($this->comprobanteTimbrado->getFolio(), $this->comprobanteTimbrado->getTimbreFiscalDigital()->getUUID());
-            $this->facturaDAO->updateVTA($this->comprobanteTimbrado->getFolio(), $this->comprobanteTimbrado->getTimbreFiscalDigital()->getUUID());
+        function setXmlTimbrado($xmlTimbrado) {
+            $this->xmlTimbrado = $xmlTimbrado;
+        }
+
+        function update() {
+            $this->facturaDAO->updateFC($this->idFactura, $this->comprobanteTimbrado->getTimbreFiscalDigital()->getUUID());
         }
 
         function save($clavePAC) {
-            error_log("Comprobante Timbrado " . print_r($this->comprobanteTimbrado, TRUE));
-            trigger_error("Comprobante Timbrado " . print_r($this->comprobanteTimbrado, TRUE));
             $this->facturaDAO->insertFactura($this->comprobanteTimbrado, $clavePAC);
         }
 

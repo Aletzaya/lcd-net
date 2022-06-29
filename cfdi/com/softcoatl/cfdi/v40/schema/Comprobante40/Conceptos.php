@@ -19,7 +19,7 @@ class Conceptos implements CFDIElement, Comprobante\Conceptos {
     /** @var Conceptos\Concepto[] */
     private $Concepto = array();
 
-    public function getConcepto(): array {
+    public function getConcepto() {
         return $this->Concepto;
     }
 
@@ -157,7 +157,7 @@ class Concepto implements CFDIElement, Comprobante\Conceptos\Concepto {
     private $Descuento;
     private $ObjetoImp;
 
-    public function getImpuestos(): ?Comprobante\Conceptos\Concepto\Impuestos {
+    public function getImpuestos() {
         return $this->Impuestos;
     }
 
@@ -579,11 +579,11 @@ class Impuestos implements CFDIElement, Comprobante\Conceptos\Concepto\Impuestos
     /** @var Impuestos\Retenciones */
     private $Retenciones;
 
-    public function getTraslados(): ?Comprobante\Conceptos\Concepto\Impuestos\Traslados {
+    public function getTraslados() {
         return $this->Traslados;
     }
 
-    public function getRetenciones(): ?Comprobante\Conceptos\Concepto\Impuestos\Retenciones {
+    public function getRetenciones() {
         return $this->Retenciones;
     }
 
@@ -621,7 +621,7 @@ class Retenciones implements CFDIElement, Comprobante\Conceptos\Concepto\Impuest
     /** @var Retenciones\Retencion[] */
     private $Retencion= array();
 
-    public function getRetencion(): array {
+    public function getRetencion() {
         return $this->Retencion;
     }
 
@@ -648,7 +648,7 @@ class Traslados implements CFDIElement, Comprobante\Conceptos\Concepto\Impuestos
     /** @var Traslados\Traslado[] */
     private $Traslado = array();
 
-    public function getTraslado(): array {
+    public function getTraslado() {
         return $this->Traslado;
     }
 

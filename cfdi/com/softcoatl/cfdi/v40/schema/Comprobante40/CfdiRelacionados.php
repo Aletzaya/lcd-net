@@ -10,7 +10,7 @@
  */
 namespace com\softcoatl\cfdi\v40\schema\Comprobante40;
 
-require_once ("com/softcoatl/cfdi/CFDIElement.php");
+require_once ("cfdi/com/softcoatl/cfdi/CFDIElement.php");
 
 use com\softcoatl\cfdi\CFDIElement;
 use com\softcoatl\cfdi\Comprobante;
@@ -21,7 +21,7 @@ class CfdiRelacionados implements CFDIElement, Comprobante\CfdiRelacionados {
     private $CfdiRelacionado = array();
     private $TipoRelacion;
     
-    function getCfdiRelacionado(): array {
+    function getCfdiRelacionado() {
         return $this->CfdiRelacionado;
     }
 

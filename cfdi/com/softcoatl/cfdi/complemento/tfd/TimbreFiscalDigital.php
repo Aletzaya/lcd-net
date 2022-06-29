@@ -10,8 +10,8 @@
  */
 namespace com\softcoatl\cfdi\complemento\tfd;
 
-require_once ("com/softcoatl/cfdi/CFDIElement.php");
-require_once ("com/softcoatl/cfdi/utils/Reflection.php");
+require_once ("cfdi/com/softcoatl/cfdi/CFDIElement.php");
+require_once ("cfdi/com/softcoatl/cfdi/utils/Reflection.php");
 
 use com\softcoatl\cfdi\CFDIElement;
 

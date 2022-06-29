@@ -9,31 +9,31 @@ require ("lib/lib.php");
 require ("CFDIComboBoxes.php");
 require_once 'class.phpmailer.php';
 
-//require_once ('cfdi33/SelloCFDI.php');
-//require_once ('cfdi33/Certificates/SATCertificates.php');
-//require_once ('cfdi33/pac/PACServiceFactory.php');
-//require_once ('cfdi33/pac/PACFactory.php');
-//require_once ('cfdi33/pac/PAC.php');
-
-require_once ('com/softcoatl/cfdi/ComprobanteResolver.php');
-require_once ('com/softcoatl/cfdi/SelloCFDI.php');
-require_once ('com/softcoatl/cfdi/utils/pac/PACServiceFactory.php');
-require_once ('com/softcoatl/security/commons/SATCertificates.php');
+require_once ('./Services/TimbradoService.php');
+require_once ('cfdi/com/softcoatl/cfdi/ComprobanteResolver.php');
+require_once ('cfdi/com/softcoatl/cfdi/SelloCFDI.php');
+require_once ('cfdi/com/softcoatl/security/commons/SATCertificates.php');
+require_once ('cfdi/com/softcoatl/cfdi/utils/pac/PACServiceFactory.php');
+require_once ('cfdi/com/softcoatl/cfdi/utils/pac/PACFactory.php');
+require_once ('cfdi/com/softcoatl/cfdi/utils/pac/PAC.php');
+require_once ('cfdi/com/softcoatl/cfdi/v40/schema/Comprobante40.php');
+//require_once ('cfdi/com/softcoatl/cfdi/ComprobanteResolver.php');
 
 require_once ('data/CiaDAO.php');
 require_once ('data/ClientesDAO.php');
 require_once ('data/FcDAO.php');
 require_once ('data/ProveedorPACDAO.php');
 require_once ('data/FacturaDetisa.php');
+require_once ('data/FacturaLcd.php');
 
 require_once ("lib/PDFGenerator.php");
 
-//use com\softcoatl\cfdi\v33\schema\Comprobante as Comprobante;
+use com\softcoatl\cfdi\v40\schema\Comprobante40;
 
-//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\\TimbreFiscalDigital");
-//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\Pagos");
-//Comprobante::registerComplemento("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\complemento\INE");
-//Comprobante::registerAddenda("com\\softcoatl\\cfdi\\v33\\schema\\Comprobante\\addenda\\Observaciones");
+Comprobante40::registerComplemento("com\\softcoatl\\cfdi\\complemento\\tfd\\TimbreFiscalDigital");
+Comprobante40::registerAddenda("com\\softcoatl\\cfdi\\addenda\\detisa\\Observaciones");
+
+use com\softcoatl\cfdi\ComprobanteResolver;
 
 $queryParameters = array();
 foreach ($_REQUEST as $key => $value) {
@@ -54,7 +54,8 @@ $fcDAO = new FcDAO();
 $pacDAO = new ProveedorPACDAO();
 
 $ppac = $pacDAO->getActive();
-$pac = com\softcoatl\cfdi\v33\PACFactory::getPAC($ppac->getUrl_webservice(), $ppac->getUsuario(), $ppac->getPassword(), $ppac->getClave_pac());
+//$pac = com\softcoatl\cfdi\v33\PACFactory::getPAC($ppac->getUrl_webservice(), $ppac->getUsuario(), $ppac->getPassword(), $ppac->getClave_pac());
+$pac = com\softcoatl\cfdi\utils\pac\PACFactory::getPAC($ppac->getUrl(), $ppac->getUser(), $ppac->getPassword(), $ppac->getPac());
 if ($pac instanceof com\softcoatl\cfdi\v33\SifeiPAC) {
     $pac->setIdEquipo($ppac->getClave_aux());
     $pac->setSerie("");
@@ -102,9 +103,10 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
     }
 
     /*     * ********************************************************************************************************************************************************* */
-    $facturaDetisa = new com\detisa\omicrom\FacturaDetisa($busca);
-    error_log(print_r($facturaDetisa, true));
-//$facturaDetisa->save("/home/omicrom/xml/prbLcd.xml");
+    //$facturaDetisa = new com\detisa\omicrom\FacturaDetisa($busca);
+    $facturaDetisa = new com\detisa\omicrom\FacturaLcd($busca);
+
+    //$facturaDetisa->save("/home/omicrom/xml/prbLcd.xml");
     if (count($facturaDetisa->getComprobante()->getConceptos()->getConcepto()) == 0) {
         die('<div align="center"><p>&nbsp;</p><font color="#99000">Error critico</font><b></b><br>El comprobante no tiene conceptos, no es posible timbrar un comprobante sin conceptos. Favor de verificar.<br><b>' . mysql_error() . '</b><br> favor de dar click en la flecha &nbsp <a class=nombre_cliente href=' . $_SERVER["PHP_SELF"] . '><img src=lib/regresa.jpg border=0></a> para regresar</div>');
     }
@@ -138,30 +140,24 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
             if (!$csd->isValid()) {
                 $Msj = "Los certificados no están vigentes. Favor de notificar a Soporte";
             } else {
-                $sello = new \com\softcoatl\cfdi\v33\SelloCFDI($csd);
-                $service = com\softcoatl\cfdi\v33\PACServiceFactory::getPACService($pac);
-                $sello->sellaComprobante($facturaDetisa->getComprobante());
-
-                $DOMFactura = $facturaDetisa->getComprobante()->asXML();
-                $xmlFactura = $DOMFactura->saveXML();
-
+                $service = new com\detifac\services\TimbradoService();
+                $xmlCFDI = $service->doin($facturaDetisa->getComprobante(), $csd);
                 try {
-                    $xmlResponse = $service->timbraComprobante($xmlFactura);
+                    if ($xmlCFDI) {
+                        $comprobanteTimbrado = (new ComprobanteResolver())->resolve($xmlCFDI);
+                        $facturaDetisa->setComprobanteTimbrado($comprobanteTimbrado);
 
-                    if ($xmlResponse) {
-                        //error_log("Comprobante Timbrado " . $xmlResponse);
-                        $cfdiTimbrado = Comprobante::parse($xmlResponse);
-                        //error_log("Comprobante Timbrado " . print_r($cfdiTimbrado, TRUE));
-                        $facturaDetisa->setComprobanteTimbrado($cfdiTimbrado);
-                        $facturaDetisa->update();
+                        $facturaDetisa->setXmlTimbrado($xmlCFDI);
+                        $facturaDetisa->update($busca);
                         $facturaDetisa->save("SIFEI");
-                        $Msj = "Facturada creada con Exito!";
-                        header("Location: facturas.php?busca=ini&Msj=$Msj");
-                    } else {
-                        $Msj = $service->getError();
+                        $pdfCFDI = PDFGenerator::generate($comprobanteTimbrado, $Tipo, $Usr);
+                        $facturaDetisa->setRepresentacionImpresa($pdfCFDI);
+                        $Msj = "Folio timbrado con UUID " . $comprobanteTimbrado->getTimbreFiscalDigital()->getUUID();
+                        // Almacena el XML y su representación impresa en disco duro
+                        file_put_contents('archivos/' . $comprobanteTimbrado->getTimbreFiscalDigital()->getUUID() . '.xml', $xmlCFDI);
+                        file_put_contents('archivos/' . $comprobanteTimbrado->getTimbreFiscalDigital()->getUUID() . '.pdf', $pdfCFDI);
                     }
-
-                    header("Location: facturas.php?busca=ini&Msj=$Msj");
+                    header("Location: facturas40.php?busca=ini&Msj=$Msj");
                 } catch (Exception $e) {
                     print_r($e->getMessage());
                     $Msj = "Error : " . $e->getMessage();
@@ -186,7 +182,7 @@ $Gmenu = $_SESSION["Usr"][5];
         <meta charset="UTF-8">
 
         <title>Genera Factura</title>
-        <?php require ("config_add.php"); ?>
+<?php require ("config_add.php"); ?>
     </head>
     <body leftmargin='<?= $MagenIzq ?>' topmargin='<?= $MargenAlt ?>' marginwidth='<?= $MargenIzq ?>' marginheight='<?= $MargenAlt ?>'>
         <?php
@@ -199,16 +195,16 @@ $Gmenu = $_SESSION["Usr"][5];
                 <td align='center'>
                     <form name='form1' method='get' action="<?= $_SERVER['PHP_SELF'] ?>" onSubmit='return ValCampos();'>
 
-                        <?php
-                        $HeA = mysql_query("SELECT fc.id,fc.cliente,clif.nombre,clif.direccion,clif.rfc,clif.codigo,
+<?php
+$HeA = mysql_query("SELECT fc.id,fc.cliente,clif.nombre,clif.direccion,clif.rfc,clif.codigo,
          clif.correo,fc.fecha,clif.enviarcorreo,fc.usocfdi,clif.municipio,fc.total,fc.iva,
          fc.formadepago,fc.importe,fc.observaciones,fc.metododepago
          FROM fc LEFT JOIN clif ON fc.cliente=clif.id
          WHERE fc.id='$busca'");
 
-                        $He = mysql_fetch_array($HeA);
-                        $Nom = utf8_encode($He[nombre]);
-                        ?>  
+$He = mysql_fetch_array($HeA);
+$Nom = utf8_encode($He[nombre]);
+?>  
                         <table bgcolor="#D5D8DC" width='60%' border='0' align='center' cellpadding='0' cellspacing='0' class='letrap' style='border:#566573 1px solid;'>
                             <tr>
                                 <td colspan="2" align="center" bgcolor="#E59866"><h2>Verificar datos del cliente</h2></td>
@@ -234,18 +230,18 @@ $Gmenu = $_SESSION["Usr"][5];
                                     <input type='text' name='Codigo' value='<?= $He[codigo] ?>' class='letrap' size='5' onBLur=Mayusculas('Codigo')>
                             <tr style="height: 25px;">
                                 <td align="right"><small style="color:#FF0000";>*</small> Uso de CFDI: </td><td>
-                                    <?php
-                                    echo "<select class='letrap' name='Usocfdi'>";
-                                    $UsoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_uso ORDER BY clave");
-                                    while ($rg = mysql_fetch_array($UsoA)) {
-                                        echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
-                                        if ($He[usocfdi] == $rg[clave]) {
-                                            $Display = $rg[descripcion];
-                                        }
-                                    }
-                                    echo "<option value='$He[usocfdi]' selected>$Display</option>";
-                                    echo "</select>";
-                                    ?>                        
+<?php
+echo "<select class='letrap' name='Usocfdi'>";
+$UsoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_uso ORDER BY clave");
+while ($rg = mysql_fetch_array($UsoA)) {
+    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
+    if ($He[usocfdi] == $rg[clave]) {
+        $Display = $rg[descripcion];
+    }
+}
+echo "<option value='$He[usocfdi]' selected>$Display</option>";
+echo "</select>";
+?>                        
                                 </td>
                             </tr>                        
                             <!--<tr>
@@ -253,38 +249,38 @@ $Gmenu = $_SESSION["Usr"][5];
                                 <td align="left">
                                     <input type="text" class="letrap" name="Relacioncfdi" id="Relacioncfdi" class="texto_tablas" size="10"/>
                                     En caso de ser necesario</small>
-                            <?php //ComboboxTipoRelacion::generate('tiporelacion');   ?>
+<?php //ComboboxTipoRelacion::generate('tiporelacion');      ?>
                                 </td>
                             </tr> -->
                             <tr style="height: 25px;">
                                 <td align="right"><small style="color:#FF0000";>*</small> M&eacute;todo de pago: &nbsp;</td>
                                 <td align="left">
-                                    <?php
-                                    echo "<select class='letrap' name='Metododepago'>";
-                                    $MpagoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_mpago ORDER BY clave");
-                                    while ($rg = mysql_fetch_array($MpagoA)) {
-                                        echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
-                                        if ($He[metododepago] == $rg[clave]) {
-                                            $Display = $rg[descripcion];
-                                        }
-                                    }
-                                    echo "<option value='$He[metododepago]' selected>$Display</option>";
-                                    echo "</select> &nbsp ";
-                                    ?>
+<?php
+echo "<select class='letrap' name='Metododepago'>";
+$MpagoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_mpago ORDER BY clave");
+while ($rg = mysql_fetch_array($MpagoA)) {
+    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
+    if ($He[metododepago] == $rg[clave]) {
+        $Display = $rg[descripcion];
+    }
+}
+echo "<option value='$He[metododepago]' selected>$Display</option>";
+echo "</select> &nbsp ";
+?>
                                 </td>
                             </tr>
                             <tr style="height: 25px;">
                                 <td align='right'><small style="color:#FF0000";>*</small> Forma de pago:</td><td>
                                     <select class='letrap' name='Formadepago'>
-                                        <?php
-                                        $Pagos = mysql_query("SELECT * FROM cpagos ORDER BY clave");
-                                        while ($rg = mysql_fetch_array($Pagos)) {
-                                            echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[concepto] . "</option>";
-                                            if ($He[formadepago] == $rg[clave]) {
-                                                $Display = $rg[concepto];
-                                            }
-                                        }
-                                        ?>
+<?php
+$Pagos = mysql_query("SELECT * FROM cpagos ORDER BY clave");
+while ($rg = mysql_fetch_array($Pagos)) {
+    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[concepto] . "</option>";
+    if ($He[formadepago] == $rg[clave]) {
+        $Display = $rg[concepto];
+    }
+}
+?>
                                         <option value='<?= $He[formadepago] ?>' selected><?= $Display ?></option>
                                     </select>
                                     Observaciones: 
@@ -293,13 +289,13 @@ $Gmenu = $_SESSION["Usr"][5];
 
                             <tr style="height: 25px;"><td align='right'>Correo electronico: &nbsp;</td><td>
                                     <input type='text' name='Correo' value='<?= $He[correo] ?>' class='letrap' size='50'> &nbsp; enviar correo
-                                    <?php
-                                    if ($He[enviarcorreo] == 'Si') {
-                                        echo "<input type='checkbox' class='botonAnimated' name='Enviarcorreo' value='Si' checked>";
-                                    } else {
-                                        echo "<input type='checkbox'  class='botonAnimated' name='Enviarcorreo' value='Si'>";
-                                    }
-                                    ?>
+<?php
+if ($He[enviarcorreo] == 'Si') {
+    echo "<input type='checkbox' class='botonAnimated' name='Enviarcorreo' value='Si' checked>";
+} else {
+    echo "<input type='checkbox'  class='botonAnimated' name='Enviarcorreo' value='Si'>";
+}
+?>
                                 </td></tr>
                             <tr style="height: 25px;">
                                 <td align='center' colspan="2">
@@ -312,49 +308,49 @@ $Gmenu = $_SESSION["Usr"][5];
                         <table width="100%"><tr><td align="right"><a href='facturas.php' class='content5' ><i class='fa fa-reply fa-2x' aria-hidden='true'></i> Regresar </a></td></tr></table>
                     </form>
 
-                    <?php
-                    echo "<table width='90%' border='0' align='center' cellpadding='3' cellspacing='0' class='letrap' style='border:#566573 1px solid; border-radius: .1em;'>";
-                    echo "<tr bgcolor='#7DCEA0'><td align='center' colspan='7'><h1 class='letrap'>PRODUCTOS A FACTURAR</h1></td></tr>";
-                    echo "<tr bgcolor='#45B39D'>";
-                    echo "<th>Producto</th>";
-                    echo "<th>Descripcion</th>";
-                    echo "<th>Cantidad</th>";
-                    echo "<th>Precio</th>";
-                    echo "<th>Descuento</th>";
-                    echo "<th>Importe</th>";
-                    echo "<th>Total</th>";
-                    echo "</tr>";
+<?php
+echo "<table width='90%' border='0' align='center' cellpadding='3' cellspacing='0' class='letrap' style='border:#566573 1px solid; border-radius: .1em;'>";
+echo "<tr bgcolor='#7DCEA0'><td align='center' colspan='7'><h1 class='letrap'>PRODUCTOS A FACTURAR</h1></td></tr>";
+echo "<tr bgcolor='#45B39D'>";
+echo "<th>Producto</th>";
+echo "<th>Descripcion</th>";
+echo "<th>Cantidad</th>";
+echo "<th>Precio</th>";
+echo "<th>Descuento</th>";
+echo "<th>Importe</th>";
+echo "<th>Total</th>";
+echo "</tr>";
 
-                    $CpoA = mysql_query("SELECT fcd.estudio,est.descripcion,fcd.precio,fcd.iva,
+$CpoA = mysql_query("SELECT fcd.estudio,est.descripcion,fcd.precio,fcd.iva,
                                  fcd.importe,fcd.descuento,fcd.cantidad
                                  FROM fcd LEFT JOIN est ON fcd.estudio=est.estudio
                                  WHERE fcd.id='$busca' ORDER BY fcd.idnvo");
-                    while ($rg = mysql_fetch_array($CpoA)) {
-                        if (($nRng % 2) > 0) {
-                            $Fdo = 'FFFFFF';
-                        } else {
-                            $Fdo = $Gfdogrid;
-                        }    //El resto de la division;
+while ($rg = mysql_fetch_array($CpoA)) {
+    if (($nRng % 2) > 0) {
+        $Fdo = 'FFFFFF';
+    } else {
+        $Fdo = $Gfdogrid;
+    }    //El resto de la division;
 
-                        echo "<tr bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
+    echo "<tr bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
 
-                        echo "<td align='left'> $rg[estudio] </td>";
-                        echo "<td align='left'> $rg[descripcion] </td>";
-                        echo "<td align='right'> $rg[cantidad] </td>";
-                        echo "<td align='right'> " . number_format($rg[precio], "2") . " </td>";
-                        echo "<td align='right'> " . number_format($rg[descuento], "2") . " </td>";
-                        echo "<td align='right'> " . number_format($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100))), "2") . " </td>";
-                        echo "<td align='right'> " . number_format(($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100)))) * (1 + ($rg["iva"] / 100)), "2") . " </td>";
-                        echo "</tr>";
-                        $sumPrecio += $rg["precio"];
-                        $sumPrecioIva += $rg["precio"] * ($rg["iva"] / 100);
-                        $sumConDescuento += $rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)));
-                        $sumTotal += ($rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)))) * (1 + ($rg["iva"] / 100));
-                        $nRng++;
-                    }
+    echo "<td align='left'> $rg[estudio] </td>";
+    echo "<td align='left'> $rg[descripcion] </td>";
+    echo "<td align='right'> $rg[cantidad] </td>";
+    echo "<td align='right'> " . number_format($rg[precio], "2") . " </td>";
+    echo "<td align='right'> " . number_format($rg[descuento], "2") . " </td>";
+    echo "<td align='right'> " . number_format($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100))), "2") . " </td>";
+    echo "<td align='right'> " . number_format(($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100)))) * (1 + ($rg["iva"] / 100)), "2") . " </td>";
+    echo "</tr>";
+    $sumPrecio += $rg["precio"];
+    $sumPrecioIva += $rg["precio"] * ($rg["iva"] / 100);
+    $sumConDescuento += $rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)));
+    $sumTotal += ($rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)))) * (1 + ($rg["iva"] / 100));
+    $nRng++;
+}
 
-                    echo "</table><br>";
-                    ?>
+echo "</table><br>";
+?>
                     <table width='90%' border='0' align='center' cellpadding='1' cellspacing='2' class='letrap' style='border:#566573 1px solid;'>
                         <tr bgcolor='#c1c1c1'>
                             <th align='right' width="70%">Sub-total $ <?= number_format($He[importe], "2") ?></th>
@@ -383,9 +379,9 @@ $Gmenu = $_SESSION["Usr"][5];
             </tr>
         </table>
 
-        <?php
-        CuadroInferior($busca);      #-------------------Siempre debe de estar por que cierra la tabla principal .
-        ?>
+<?php
+CuadroInferior($busca);      #-------------------Siempre debe de estar por que cierra la tabla principal .
+?>
     </body>
 
 </html>

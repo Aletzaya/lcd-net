@@ -12,7 +12,7 @@
 
 namespace com\softcoatl\cfdi\utils\pac;
 
-require_once ("com/softcoatl/cfdi/utils/SOAPClient.php");
+require_once ("cfdi/com/softcoatl/cfdi/utils/SOAPClient.php");
 require_once ("BasePACService.php");
 
 use com\softcoatl\cfdi\Comprobante;

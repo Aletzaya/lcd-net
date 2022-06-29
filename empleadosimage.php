@@ -32,6 +32,10 @@ if ($_REQUEST["ImageEmp"] === "Actualizar") {
         $Msj = "Registro eliminado con exito!";
         AgregaBitacoraEventos($Gusr, '/R.Humanos/Empleados/Elimina imagen', "imageEmp", $Fecha, $busca, $Msj, "empleadosimage.php");
     }
+} elseif ($_REQUEST["op"] === "Dwn") {
+    header("Content-disposition: attachment; filename=" . $_REQUEST["archivo"]);
+    header("Content-type: MIME");
+    readfile("imageEmp/" . $_REQUEST["archivo"]);
 }
 
 #Variables comunes;
@@ -106,6 +110,9 @@ require ("config.php");          //Parametros de colores;
                                             <input name="IdArchivoImage" value="<?= $ImgRs[id] ?>" type="hidden"></input>
                                             <input name="busca" value="<?= $busca ?>" type="hidden"></input>
                                             <input type="submit" name="ImageEmp" value="Actualizar"></input>
+                                            <a href="empleadosimage.php?busca=<?= $_REQUEST["busca"] ?>&op=Dwn&archivo=<?= $ImgRs["nombreArchivo"] ?>">
+                                                <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                                            </a>
                                         </form>
                                         <?php
                                         $i++;

@@ -199,6 +199,7 @@ if ($op == "download") {
     header("Content-Type: application/xml");
     header("Content-Disposition: attachment; filename=" . $rg["uuid"] . ".xml");
     echo $xml;
+    exit();
 }
 
 //echo $cSql;

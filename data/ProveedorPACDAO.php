@@ -9,14 +9,18 @@
  * @version 1.0
  * @since jul 2017
  */
-
+require_once ('cfdi/com/softcoatl/cfdi/utils/pac/PACFactory.php');
 include_once ('mysqlUtils.php');
 include_once ('ProveedorPACVO.php');
+
+use com\softcoatl\cfdi\utils\pac\PACFactory;
+use com\softcoatl\cfdi\utils\pac\SifeiPACWrapper;
+use com\softcoatl\cfdi\utils\pac\ProdigiaPACWrapper;
 
 class ProveedorPACDAO {
 
     private $conn;
-    
+
     public function __construct() {
         $this->conn = getConnection();
     }
@@ -25,23 +29,24 @@ class ProveedorPACDAO {
         $this->conn->close();
     }
 
-    public function getActive() {
-        $pac = new ProveedorPACVO();
-        $sql = "SELECT * FROM proveedor_pac WHERE activo = 1";
-        if (($query = $this->conn->query($sql)) && ($rs = $query->fetch_assoc())) {
-            $pac->setId_pac($rs['id_pac']);
-            $pac->setClave_pac($rs['clave_pac']);
-            $pac->setNombre_pac($rs['nombre_pac']);
-            $pac->setUrl_webservice($rs['url_webservice']);
-            $pac->setUrl_cancelacion($rs['url_cancelacion']);
-            $pac->setUsuario($rs['usuario']);
-            $pac->setPassword($rs['password']);
-            $pac->setClave_aux($rs['clave_aux']);
-            $pac->setClave_aux2($rs['clave_aux2']);
-            $pac->setActivo($rs['activo']);
-            $pac->setPruebas($rs['pruebas']);
-            $pac->setPrioridad($rs['prioridad']);
+    private function parsePAC($rs) {
+        $pac = PACFactory::getPAC($rs["url_webservice"], $rs["usuario"], $rs["password"], $rs["clave_pac"]);
+        if ($pac instanceof SifeiPACWrapper) {
+            $pac->setIdEquipo($rs["clave_aux"]);
+            $pac->setSerie($rs["clave_aux2"]);
+        } else if ($pac instanceof ProdigiaPACWrapper) {
+            $pac->setContrato($rs["clave_aux"]);
         }
+        $pac->setUrlCancelacion($rs["url_cancelacion"]);
         return $pac;
     }
+
+    public function getActive() {
+        $sql = "SELECT * FROM proveedor_pac WHERE activo = 1";
+        if (($query = $this->conn->query($sql)) && ($rs = $query->fetch_assoc())) {
+            return $this->parsePAC($rs);
+        }
+        return false;
+    }
+
 }

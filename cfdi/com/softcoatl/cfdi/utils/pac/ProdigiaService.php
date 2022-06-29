@@ -11,7 +11,7 @@
 
 namespace com\softcoatl\cfdi\utils\pac;
 
-require_once ("com/softcoatl/cfdi/utils/SOAPClient.php");
+require_once ("cfdi/com/softcoatl/cfdi/utils/SOAPClient.php");
 require_once ("BasePACService.php");
 
 use com\softcoatl\cfdi\utils\SOAPClient;
@@ -144,7 +144,6 @@ class ProdigiaService extends BasePACService {
     }
 
     public function timbraComprobante(Comprobante $cfdi) {
-
         $prodigia = (new ProdigiaTimbradoCaller($this->PAC))
                 ->setParameter("cfdiXml", $cfdi->asXML()->saveXML())
                 ->setParameter("opciones" , ["VERIFICAR_SERIE_FOLIO", "REGRESAR_CON_ERROR_307_XML"])

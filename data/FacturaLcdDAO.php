@@ -13,38 +13,60 @@
 namespace com\detisa\omicrom {
 
     require_once ('mysqlUtils.php');
-    require_once ('cfdi33/Comprobante.php');
-    require_once ('cfdi33/addenda/Observaciones.php');
+    require_once ('DocumentoCFDIDetifac.php');
+    require_once ('lib/PDFGenerator.php');
+    require_once ("cfdi/factory/ComprobanteFactory.php");
+    require_once ('cfdi/com/softcoatl/cfdi/Comprobante.php');
 
-    use com\softcoatl\cfdi\v33\schema\Comprobante as Comprobante;
+    //require_once ('cfdi/com/softcoatl/cfdi/addenda/detisa/Observaciones.php');
 
-    class FacturaDAO {
+    use com\softcoatl\cfdi\Comprobante;
+    use com\detisa\cfdi\factory\ComprobanteFactoryIface;
+    use com\detisa\cfdi\factory\ComprobanteFactory;
+
+    class FacturaLcdDAO {
 
         private $folio;
+        protected $tipo;
         /* @var $comprobante Comprobante */
         private $comprobante;
         /* @var $mysqlConnection \mysqli */
         private $mysqlConnection;
+        protected $factory;
+        private $xmlTimbrado;
 
         function __construct($folio) {
 
-            error_log("Cargando CFDI con folio " . $folio);
+            error_log("***** Cargando CFDI con folio " . $folio . " F4.0  *****");
 
             $this->folio = $folio;
-            $this->comprobante= new Comprobante();
+            $this->factory = ComprobanteFactory::getFactory($folio, "fc");
             $this->mysqlConnection = getConnection();
-            
+            $this->buildComprobante();
+        }
+
+        protected function buildComprobante() {
             $this->comprobante();
             $this->emisor();
             $this->receptor();
-            $this->cfdiRelacionados();
+            //$this->cfdiRelacionados();
             $this->conceptos();
             $this->impuestos();
-            $this->observaciones();
-        }//constructor
+//                    ->observaciones();
+        }
+
+//constructor
 
         public function __destruct() {
             $this->mysqlConnection->close();
+        }
+
+        function setXml($xml) {
+            $this->xml = $xml;
+        }
+
+        function setXmlTimbrado($xmlTimbrado) {
+            $this->xmlTimbrado = $xmlTimbrado;
         }
 
         function getFolio() {
@@ -71,31 +93,27 @@ namespace com\detisa\omicrom {
 
             $sql = "SELECT 
                     fc.id, 
-                    DATE_FORMAT(fc.fecha, '%Y-%m-%dT%H:%h:%i') fecha, 
-                    fc.serie, 
-                    fc.formadepago, 
-                    fc.metododepago, 
-                    fc.total,
-                    cia.codigo
+                    DATE_FORMAT(fc.fecha, '%Y-%m-%dT%H:%h:%i') Fecha, 
+                    fc.serie Serie, 
+                    fc.folio Folio,
+                    fc.formadepago FormaPago, 
+                    fc.metododepago MetodoPago,
+                    'MXN' Moneda,
+                    'I' TipoDeComprobante,
+                    '4.0' Version,
+                    CAST( fc.total AS DECIMAL( 12, 2 ) )  Total,
+                    CAST( fc.importe AS DECIMAL( 12, 2 ) ) SubTotal,
+                    cia.codigo LugarExpedicion
                     FROM fc JOIN cia ON cia.id = 1
                     WHERE fc.id = " . $this->folio;
 
-            if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
-                $this->comprobante->setFolio($rs['id']);
-                $this->comprobante->setSerie($rs['serie']);
-                $this->comprobante->setFecha($rs['fecha']);
-                $this->comprobante->setTipoDeComprobante("I");
-                $this->comprobante->setVersion("3.3");
-                $this->comprobante->setFormaPago($rs['formadepago']);
-                $this->comprobante->setMetodoPago($rs['metododepago']);
-                $this->comprobante->setMoneda("MXN");
-                $this->comprobante->setTipoCambio(1);
-                $this->comprobante->setTotal(number_format($rs['total'], 2, '.', ''));
-                $this->comprobante->setLugarExpedicion($rs['codigo']);
-            }else{
-                error_log($this->mysqlConnection->error);
+            if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_array())) {
+                $this->comprobante = $this->factory->createComprobante($rs);
             }
-        }//comprobante
+            return $this;
+        }
+
+//comprobante
 
         /**
          * 
@@ -103,19 +121,16 @@ namespace com\detisa\omicrom {
          */
         private function emisor() {
 
-            /* @var $emisor Comprobante\Emisor */
-            $emisor = new Comprobante\Emisor();
-            $sql = "SELECT nombre, rfc, clave_regimen FROM cia WHERE cia.id in (100,1) AND facturacion='Si'";
-
+            $sql = "SELECT UPPER( cia.nombre ) "
+                    . "Nombre , rfc Rfc, clave_regimen RegimenFiscal FROM cia WHERE cia.id in (100,1)";
+            error_log($sql);
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
-                $emisor->setNombre($rs['nombre']);
-                $emisor->setRfc($rs['rfc']);
-                $emisor->setRegimenFiscal($rs['clave_regimen']);
-            }else{
-                error_log($this->mysqlConnection->error);
+                $this->comprobante->setEmisor($this->factory->createComprobanteEmisor($rs));
             }
-            $this->comprobante->setEmisor($emisor);
-        }//retrieve
+            return $this;
+        }
+
+//retrieve
 
         /**
          * 
@@ -123,19 +138,17 @@ namespace com\detisa\omicrom {
          */
         private function receptor() {
 
-            /* @var $emisor Comprobante\Receptor */
-            $receptor = new Comprobante\Receptor();
-            $sql = "SELECT clif.nombre, clif.rfc, fc.usocfdi FROM fc JOIN clif ON fc.cliente = clif.id WHERE fc.id = " . $this->folio;
+            $sql = "SELECT clif.nombre Nombre, clif.rfc Rfc, fc.usocfdi UsoCFDI,regimenFiscal RegimenFiscalReceptor,"
+                    . "codigo DomicilioFiscalReceptor "
+                    . " FROM fc JOIN clif ON fc.cliente = clif.id WHERE fc.id = " . $this->folio;
 
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
-                $receptor->setNombre($rs['nombre']);
-                $receptor->setRfc($rs['rfc']);
-                $receptor->setUsoCFDI($rs['usocfdi']);
-            }else{
-                error_log($this->mysqlConnection->error);
+                $this->comprobante->setReceptor($this->factory->createComprobanteReceptor($rs));
             }
-            $this->comprobante->setReceptor($receptor);
-        }//receptor
+            return $this;
+        }
+
+//receptor
 
         /**
          * 
@@ -143,8 +156,8 @@ namespace com\detisa\omicrom {
          */
         private function cfdiRelacionados() {
 
-            $cfdiRelacionados = new Comprobante\CfdiRelacionados();
-            $cfdiRelacionado = new Comprobante\CfdiRelacionados\CfdiRelacionado();
+            $cfdiRelacionados = $this->factory->createComprobanteCfdiRelacionados();
+
 
             $sql = "
                 SELECT F.id, IFNULL(F.tiporelacion,  '') tiporelacion, IFNULL(R.id,  '') rfolio, IFNULL(R.uuid,  '') ruuid
@@ -153,16 +166,17 @@ namespace com\detisa\omicrom {
                 WHERE F.id = " . $this->folio;
 
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
-                if (!empty($rs['ruuid'])) {
-                    $cfdiRelacionado->setUUID($rs['ruuid']);
-                    $cfdiRelacionados->addCfdiRelacionado($cfdiRelacionado);
-                    $cfdiRelacionados->setTipoRelacion($rs['tiporelacion']);
-                    $this->comprobante->setCfdiRelacionados($cfdiRelacionados);
-                }
-            }else{
-                error_log($this->mysqlConnection->error);
+                $relacionados[] = $this->factory->createComprobanteCfdiRelacionadosCfdiRelacionado($rs);
+                $cfdiRelacionados->setTipoRelacion($rs["tipo_relacion"]);
             }
-        }//cfdiRelacionados
+            if (count($relacionados) > 0) {
+                $cfdiRelacionados->setCfdiRelacionado($relacionados);
+                $this->comprobante->setCfdiRelacionados([$cfdiRelacionados]);
+            }
+            return $this;
+        }
+
+//cfdiRelacionados
 
         /**
          * 
@@ -170,7 +184,7 @@ namespace com\detisa\omicrom {
          */
         private function conceptos() {
 
-            $conceptos = new Comprobante\Conceptos();
+            $conceptos = $this->factory->createComprobanteConceptos();
             $subTotal = 0.00;
             $sql = "SELECT fcd.estudio NoIdentificacion, 
                    est.descripcion Descripcion, 
@@ -189,48 +203,50 @@ namespace com\detisa\omicrom {
             $total = 0.00;
 
             if (($query = $this->mysqlConnection->query($sql))) {
-                
+
                 while (($rs = $query->fetch_assoc())) {
-                    
-                    $concepto = new Comprobante\Conceptos\Concepto();
-                    
-                    $concepto->setClaveProdServ($rs['ClaveProdServ']);
-                    $concepto->setClaveUnidad($rs['ClaveUnidad']);
-                    $concepto->setDescripcion($rs['Descripcion']);
-                    $concepto->setImporte(number_format($rs['ValorUnitario'], 2, '.', ''));
-                    $concepto->setCantidad(number_format($rs['Cantidad'], 4, '.', ''));
-                    $concepto->setNoIdentificacion($rs['NoIdentificacion']);
-                    $concepto->setValorUnitario(number_format($rs['ValorUnitario'], 4, '.', ''));
+                    $concepto = $this->factory->createComprobanteConceptosConcepto($rs);
 
-                    $subTotal += $rs['ValorUnitario'];
+                    $subTotal += round($rs['ValorUnitario'], 2);
+                    $Total += round($rs['Importe'], 2);
+                    $trasladados = array();
+                    $retenidos = array();
+                    if ($rs["tax_iva"] > 0) {
+                        $Imp = number_format(round($rs['tax_iva'], 2), 2, '.', '');
+                        $trasladados[] = $this->factory->createComprobanteConceptosConceptoImpuestosTrasladosTraslado([
+                            "Base" => $rs["ValorUnitario"],
+                            "Impuesto" => "002",
+                            "TasaOCuota" => $rs["factoriva"],
+                            "TipoFactor" => "Tasa",
+                            "Importe" => $Imp]);
+                    }
+                    $Impuestos = $this->factory->createComprobanteConceptosConceptoImpuestos();
 
-                    $traslados = new Comprobante\Conceptos\Concepto\Impuestos\Traslados();
+                    if (count($trasladados) > 0) {
+                        $traslados = $this->factory->createComprobanteConceptosConceptoImpuestosTraslados();
+                        $traslados->setTraslado($trasladados);
+                        $Impuestos->setTraslados($traslados);
+                    }
+                    if (count($retenidos) > 0 || count($trasladados) > 0) {
+                        $concepto->setImpuestos($Impuestos);
+                    }
 
-                    $iva = new Comprobante\Conceptos\Concepto\Impuestos\Traslados\Traslado();
-                    $iva->setBase(number_format($rs['ValorUnitario'], 2, '.', ''));
-                    $iva->setImpuesto('002');
-                    $iva->setTasaOCuota($rs['factoriva']);
-                    $iva->setTipoFactor('Tasa');
-                    //Iva del producto
-                    $ImporteIva = round($rs['tax_iva'], 2);
-                    $iva->setImporte(number_format($ImporteIva, 2, '.', ''));
-
-                    $traslados->addTraslado($iva);
-
-                    $impuestos = new Comprobante\Conceptos\Concepto\Impuestos();
-                    $impuestos->setTraslados($traslados);
-                    $concepto->setImpuestos($impuestos);
                     $conceptos->addConcepto($concepto);
+                    $difference = round($this->comprobante->getTotal() - $Total, 2);
+                    if (abs($difference) > 0.001) {
+                        error_log("There is a difference " . $difference);
+                        $this->comprobante->setTotal(number_format($Total, 2, ".", ""));
+                        $this->comprobante->setSubTotal(number_format($subTotal, 2, ".", ""));
+                    } else {
+                        error_log("Equals totals");
+                    }
+                    $this->comprobante->setConceptos($conceptos);
                 }//while
-
-                $this->comprobante->setSubTotal(number_format($subTotal, 2, '.', ''));
-                $this->comprobante->setConceptos($conceptos);
-                 
-               
-            }else{
-                error_log($this->mysqlConnection->error);
             }
-        }//conceptos
+            return $this;
+        }
+
+//conceptos
 
         /**
          * 
@@ -238,13 +254,13 @@ namespace com\detisa\omicrom {
          */
         //Agrupa la suma de los impuestos por tasa
         private function impuestos() {
+            $trasladados = array();
+            $retenidos = array();
 
-            $impuestos = new Comprobante\Impuestos();
-            $traslados = new Comprobante\Impuestos\Traslados();
-
+            $total_traslado = 0.00;
             $sql = "
                 SELECT 
-                    SUM(round(importe-precio,2)) ValorIva, 
+                    SUM(round(importe-precio,2)) ValorIva, precio,
                     CAST( fcd.iva /100 AS DECIMAL( 10, 6 ) ) factoriva,
                     SUM( ROUND( fcd.cantidad * fcd.precio * CAST( fcd.iva /100 AS DECIMAL( 10, 6 ) ), 2 ) ) tax_iva
                     FROM fcd, est
@@ -255,32 +271,37 @@ namespace com\detisa\omicrom {
 
             if (($query = $this->mysqlConnection->query($sql))) {
                 while (($rs = $query->fetch_assoc())) {
-                    $total_traslado += $rs['tax_iva'];
-                    $iva = new Comprobante\Impuestos\Traslados\Traslado();
-                    $iva->setImporte(number_format($rs['tax_iva'], 2, '.', ''));
-                    $iva->setImpuesto('002');
-                    $iva->setTasaOCuota($rs['factoriva']);
-                    $iva->setTipoFactor('Tasa');
-                    $traslados->addTraslado($iva);                   
+                    $trasladados[] = $this->factory->createComprobanteImpuestosTrasladosTraslado([
+                        "Importe" => $rs["tax_iva"],
+                        "Impuesto" => "002",
+                        "TasaOCuota" => $rs["factoriva"],
+                        "Base" => $rs["precio"],
+                        "TipoFactor" => "Tasa"]);
+
+                    $total_traslado += $rs["tax_iva"];
                 }
 
+                $impuestos = $this->factory->createComprobanteImpuestos();
 
-                $impuestos->setTraslados($traslados);
-                //$impuestos->setTotalImpuestosRetenidos('0.00');
-                $impuestos->setTotalImpuestosTrasladados($total_traslado);
-
+                if (count($trasladados) > 0) {
+                    $traslados = $this->factory->createComprobanteImpuestosTraslados();
+                    $traslados->setTraslado($trasladados);
+                    $impuestos->setTraslados($traslados);
+                    $impuestos->setTotalImpuestosTrasladados(number_format($total_traslado, 2, ".", ""));
+                }
                 $this->comprobante->setImpuestos($impuestos);
-            }else{
-                error_log($this->mysqlConnection->error);
+                return $this;
             }
-        }//getImpuestosFactura
+        }
+
+//getImpuestosFactura
 
         /**
          * 
          * @throws \com\detisa\omicrom\Exception
          */
         private function observaciones() {
-            
+
             $observaciones = new Comprobante\addenda\Observaciones();
             $sql = "
                 SELECT fc.observaciones, fcd.orden 
@@ -293,7 +314,7 @@ namespace com\detisa\omicrom {
             if (($query = $this->mysqlConnection->query($sql))) {
                 while (($rs = $query->fetch_assoc())) {
                     $observacion = $rs['observaciones'];
-                    $tickets .= ($i++>0 ? ', ' : '') . $rs['orden'];
+                    $tickets .= ($i++ > 0 ? ', ' : '') . $rs['orden'];
                 }
                 if ($observacion !== '') {
                     $observaciones->addObservaciones(new Comprobante\addenda\Observaciones\Observacion($observacion));
@@ -304,23 +325,22 @@ namespace com\detisa\omicrom {
                 }
 
                 $this->comprobante->addAddenda($observaciones);
-            }else{
+            } else {
                 error_log($this->mysqlConnection->error);
             }
         }
-        
+
         public function updateFC($id, $uuid) {
-            
+
             $sql = "UPDATE fc SET uuid = '" . $uuid . "', status = 'Timbrada' WHERE fc.id = " . $id;
+            error_log("UPDATEEEEEEE" . $sql);
             return $this->mysqlConnection->query($sql);
         }
-        
+
         public function cancelFC($id, $acuse) {
-            
+
             $sql = "UPDATE fc JOIN facturas ON fc.uuid = facturas.uuid SET fc.status = 'Cancelada', facturas.acuse_cancelacion = ? WHERE fc.id = ?";
-            if (($ps = $this->mysqlConnection->prepare($sql))
-                    && $ps->bind_param("si", $acuse, $id)
-                    && $ps->execute()) {
+            if (($ps = $this->mysqlConnection->prepare($sql)) && $ps->bind_param("si", $acuse, $id) && $ps->execute()) {
                 return true;
             }
             return false;
@@ -332,47 +352,50 @@ namespace com\detisa\omicrom {
                     . "WHERE id IN (SELECT ticket FROM fcd JOIN inv ON inv.id = fcd.producto AND rubro = 'Combustible' WHERE fcd.id = " . $id . " AND ticket <> 0)";
             return $this->mysqlConnection->query($sql);
         }
-        
+
         public function updateVTA($id, $uuid) {
-            
+
             $sql = "UPDATE vtaditivos SET uuid = '" . $uuid . "' "
                     . "WHERE id IN (SELECT ticket FROM fcd JOIN inv ON inv.id = fcd.producto AND rubro = 'Aceites' WHERE fcd.id = " . $id . " AND ticket <> 0)";
             return $this->mysqlConnection->query($sql);
         }
-        
-        
+
         /**
          * 
          * @param Comprobante $Comprobante
          */
         public function insertFactura($Comprobante, $clavePAC) {
-            
+
             $sql = "INSERT INTO facturas (cfdi_xml, pdf_format, fecha_emision, fecha_timbrado, clave_pac, id_fc_fk, emisor, receptor, uuid)"
                     . " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            error_log("ERRRORRRR" . $sql);
             $pdf = \PDFGenerator::generate($Comprobante, 1, "");
             $DOM = $Comprobante->asXML();
             $xml = $DOM->saveXML();
-           
+            error_log("______________-------____________________");
+
             $stmt = $this->mysqlConnection->prepare($sql);
-            
+            error_log(print_r($stmt, true));
             if ($stmt) {
-                $stmt->bind_param("sssssssss", 
+                $stmt->bind_param("sssssssss",
                         $xml,
                         $pdf,
                         $Comprobante->getFecha(),
                         $Comprobante->getTimbreFiscalDigital()->getFechaTimbrado(),
                         $clavePAC,
-                        $Comprobante->getFolio(),
+                        $this->folio,
                         $Comprobante->getEmisor()->getRfc(),
                         $Comprobante->getReceptor()->getRfc(),
                         $Comprobante->getTimbreFiscalDigital()->getUUID());
                 if (!$stmt->execute()) {
-                    trigger_error($stmt->error);
+                    error_log($this->mysqlConnection->error);
                 }
             } else {
-                trigger_error("Error insertando factura " . $this->mysqlConnection->error);
+                error_log("Error insertando factura " . $this->mysqlConnection->error);
             }
-            
         }
-    }//FacturaDAO
+
+    }
+
+    //FacturaDAO
 }//com\detisa\omicrom

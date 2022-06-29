@@ -10,12 +10,12 @@
  */
 namespace com\softcoatl\cfdi\v40\schema;
 
-require_once ('com/softcoatl/cfdi/complemento/tfd/TimbreFiscalDigital.php');
-require_once ("com/softcoatl/cfdi/Comprobante.php");
-require_once ("com/softcoatl/cfdi/CFDIElement.php");
-require_once ("com/softcoatl/cfdi/Comprobante.php");
-require_once ("com/softcoatl/cfdi/ValidadorCFDI.php");
-require_once ("com/softcoatl/cfdi/utils/Reflection.php");
+require_once ('cfdi/com/softcoatl/cfdi/complemento/tfd/TimbreFiscalDigital.php');
+require_once ("cfdi/com/softcoatl/cfdi/Comprobante.php");
+require_once ("cfdi/com/softcoatl/cfdi/CFDIElement.php");
+require_once ("cfdi/com/softcoatl/cfdi/Comprobante.php");
+require_once ("cfdi/com/softcoatl/cfdi/ValidadorCFDI.php");
+require_once ("cfdi/com/softcoatl/cfdi/utils/Reflection.php");
 require_once (dirname(__FILE__)."/Comprobante40/InformacionGlobal.php");
 require_once (dirname(__FILE__)."/Comprobante40/CfdiRelacionados.php");
 require_once (dirname(__FILE__)."/Comprobante40/Emisor.php");
@@ -85,31 +85,31 @@ class Comprobante40 implements CFDIElement, Comprobante {
         return $this->InformacionGlobal;
     }
 
-    public function getCfdiRelacionados(): array {
+    public function getCfdiRelacionados() {
         return $this->CfdiRelacionados;
     }
 
-    public function getEmisor(): ?Comprobante\Emisor {
+    public function getEmisor() {
         return $this->Emisor;
     }
 
-    public function getReceptor(): ?Comprobante\Receptor {
+    public function getReceptor() {
         return $this->Receptor;
     }
 
-    public function getConceptos(): ?Comprobante\Conceptos {
+    public function getConceptos() {
         return $this->Conceptos;
     }
 
-    public function getImpuestos(): ?Comprobante\Impuestos {
+    public function getImpuestos() {
         return $this->Impuestos;
     }
 
-    public function getComplemento(): ?Comprobante\Complemento {
+    public function getComplemento() {
         return $this->Complemento;
     }
 
-    public function getAddenda(): ?Comprobante\Addenda {
+    public function getAddenda() {
         return $this->Addenda;
     }
 
@@ -317,7 +317,7 @@ class Comprobante40 implements CFDIElement, Comprobante {
         self::$ARR_ADDENDA[] = $addenda;
     }
 
-    public function getTimbreFiscalDigital(): \com\softcoatl\cfdi\complemento\tfd\TimbreFiscalDigital {
+    public function getTimbreFiscalDigital() {
         if (!empty($this->Complemento)) {
             foreach ($this->Complemento->getAny() as $Complemento) {
                 if ($Complemento instanceof \com\softcoatl\cfdi\complemento\tfd\TimbreFiscalDigital) {
@@ -406,7 +406,7 @@ class Comprobante40 implements CFDIElement, Comprobante {
         return $DOMDocument;
     }
 
-    public function asXML($root= null): \DOMDocument {
+    public function asXML($root= null) {
 
         $document = new \DOMDocument("1.0", "UTF-8");
         $Comprobante = $document->createElement("cfdi:Comprobante");
