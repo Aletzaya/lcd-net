@@ -116,6 +116,14 @@ class Comprobante40Factory implements ComprobanteFactoryIface {
         return new Comprobante40\Conceptos\Concepto\Impuestos\Traslados();
     }
 
+    public function createInfoGlobal(array $rs) {
+        $InfoGlobal = new Comprobante40\InformacionGlobal();
+        $InfoGlobal->setAnio($rs["Anio"]);
+        $InfoGlobal->setMeses($rs["Mes"]);
+        $InfoGlobal->setPeriodicidad($rs["Periodo"]);
+        return $InfoGlobal;
+    }
+
     public function createComprobanteConceptosConceptoImpuestosTrasladosTraslado(array $rs) {
 
         $traslado = new Comprobante40\Conceptos\Concepto\Impuestos\Traslados\Traslado();

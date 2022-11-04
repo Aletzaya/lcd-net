@@ -9,19 +9,19 @@ include_once ("check.php");
 require("lib/lib.php");
 
 $link = conectarse();
-$busca = $_REQUEST[busca];
-$Gusr = $_SESSION[Usr][0];
-$Gcia = $_SESSION[Usr][1];
-$Gnomcia = $_SESSION[Usr][2];
-$Gnivel = $_SESSION[Usr][3];
-$Gteam = $_SESSION[Usr][4];
-$Gmenu = $_SESSION[Usr][5];
+$busca = $_REQUEST["busca"];
+$Gusr = $_SESSION["Usr"][0];
+$Gcia = $_SESSION["Usr"][1];
+$Gnomcia = $_SESSION["Usr"][2];
+$Gnivel = $_SESSION["Usr"][3];
+$Gteam = $_SESSION["Usr"][4];
+$Gmenu = $_SESSION["Usr"][5];
 $Fecha = date("Y-m-d H:m:s");
 #Variables comunes;
 $Msj = $_REQUEST[Msj];
 $Titulo = "Ordenes de estudio";
-$Msj = $_REQUEST[Msj];
-$StatusMensaje = $_REQUEST[Status];
+$Msj = $_REQUEST["Msj"];
+$StatusMensaje = $_REQUEST["Status"];
 if ($_REQUEST["Boton"] == "Enviar") {
 
     $CiaA = mysql_query("SELECT password,iva FROM cia WHERE id='1'");
@@ -32,10 +32,10 @@ if ($_REQUEST["Boton"] == "Enviar") {
 
     if ($Cia[0] == $Clave) {
 
-        $FecI = $_REQUEST[FecI];
-        $FecF = $_REQUEST[FecF];
-        $Depto = $_REQUEST[Depto];
-        $Institucion = $_REQUEST[Institucion];
+        $FecI = $_REQUEST["FecI"];
+        $FecF = $_REQUEST["FecF"];
+        $Depto = $_REQUEST["Depto"];
+        $Institucion = $_REQUEST["Institucion"];
 
         if ($Depto == '' OR $Depto == '*') {
             $cc = "SELECT otd.estudio, otd.precio,otd.descuento 
@@ -70,7 +70,7 @@ if ($_REQUEST["Boton"] == "Enviar") {
         Totaliza($busca);
         //header("Location: facturas40e.php?Msj=$Msj&busca=$busca&Status=$Status");
     }
-} elseif ($_REQUEST[Boton] === "Agregar") {
+} elseif ($_REQUEST["Boton"] === "Agregar") {
 
     $CiaA = mysql_query("SELECT iva FROM cia LIMIT 1");
     $Cia = mysql_fetch_array($CiaA);
@@ -91,7 +91,7 @@ if ($_REQUEST["Boton"] == "Enviar") {
     Totaliza($busca);
     $Msj = "Registros ingresados con exito!";
     header("Location: facturas40e.php?Msj=$Msj&busca=$busca&Status=$Status");
-} elseif ($_REQUEST[op] === "delete") {
+} elseif ($_REQUEST["op"] === "delete") {
     $sql = "DELETE FROM fcd WHERE idnvo = " . $_REQUEST["Id"] . ";";
     if (mysql_query($sql)) {
         $Msj = "Registro eliminado";
@@ -99,7 +99,7 @@ if ($_REQUEST["Boton"] == "Enviar") {
         Totaliza($busca);
         header("Location: facturas40e.php?Msj=$Msj&busca=$busca&Status=$Status");
     }
-} elseif ($_REQUEST[Boton] == 'Descto' AND $_REQUEST[Descuento] > 0) {
+} elseif ($_REQUEST["Boton"] == 'Descto' AND $_REQUEST["Descuento"] > 0) {
     $Select = "SELECT * FROM fcd WHERE id = $busca";
     $dt = mysql_query($Select);
     while ($rs = mysql_fetch_array($dt)) {
@@ -125,20 +125,20 @@ if ($_REQUEST["Boton"] == "Enviar") {
     }
 
     header("Location: facturas40e.php?Msj=$Msj&busca=$busca&Status=$Status");
-} elseif ($_REQUEST[Boton] == 'Enviar') {
+} elseif ($_REQUEST["Boton"] == 'Enviar') {
 
     $CiaA = mysql_query("SELECT password,iva FROM cia WHERE id='1'");
     $Cia = mysql_fetch_array($CiaA);
 
-    $Clave = md5($_REQUEST[Password]);
+    $Clave = md5($_REQUEST["Password"]);
 
 
     if ($Cia[0] == $Clave) {
 
-        $FecI = $_REQUEST[FecI];
-        $FecF = $_REQUEST[FecF];
-        $Depto = $_REQUEST[Depto];
-        $Institucion = $_REQUEST[Institucion];
+        $FecI = $_REQUEST["FecI"];
+        $FecF = $_REQUEST["FecF"];
+        $Depto = $_REQUEST["Depto"];
+        $Institucion = $_REQUEST["Institucion"];
 
         if ($Depto == '' OR $Depto == '*') {
             $result = mysql_query("SELECT otd.estudio, otd.precio,otd.descuento 
@@ -157,9 +157,9 @@ if ($_REQUEST["Boton"] == "Enviar") {
 
         while ($rg = mysql_fetch_array($result)) {
 
-            $Precio = round($rg[precio] * (1 - ($rg[descuento] / 100)), 2);
+            $Precio = round($rg["precio"] * (1 - ($rg["descuento"] / 100)), 2);
 
-            $PrecioU = round($Precio / (1 + ($Cia[iva] / 100)), 2);
+            $PrecioU = round($Precio / (1 + ($Cia["iva"] / 100)), 2);
 
             $lUp = mysql_query("INSERT INTO fcd 
                            (id,estudio,precio,descuento,orden,iva,cantidad,importe)
@@ -171,10 +171,10 @@ if ($_REQUEST["Boton"] == "Enviar") {
         Totaliza($busca);
     } else {
 
-        $Msj = 'Error: password ' . $Clave . " vs " . md5($_REQUEST[Password]);
+        $Msj = 'Error: password ' . $Clave . " vs " . md5($_REQUEST["Password"]);
     }
 } elseif ($_REQUEST["Boton"] === "Desc") {
-    $Select = "SELECT * FROM fcd WHERE idnvo = $_REQUEST[Idnvo]";
+    $Select = "SELECT * FROM fcd WHERE idnvo = ".$_REQUEST["Idnvo"];
     $dt = mysql_query($Select);
     $rs = mysql_fetch_array($dt);
     if ($rs["descuento"] == 0) {
@@ -227,14 +227,14 @@ require ("config.php");          //Parametros de colores;
                 <td>
                     <table align='center' width='92%' cellpadding='0' cellspacing='1' border='0'>
                         <tr class="letrasubt">
-                            <td><strong>No.factura:</strong> <?= $He[folio] ?></td>
-                            <td><strong>Cliente:</strong> <?= ucwords($He[nombre]) ?> </td>
-                            <td align='right'><strong>No.estudios:</strong> <?= $He[cantidad] ?></td>
+                            <td><strong>No.factura:</strong> <?= $He["folio"] ?></td>
+                            <td><strong>Cliente:</strong> <?= ucwords($He["nombre"]) ?> </td>
+                            <td align='right'><strong>No.estudios:</strong> <?= $He["cantidad"] ?></td>
                         </tr>
                         <tr class="letrasubt">
                             <td><strong>Fecha:</strong> <?= $He["fecha"] ?> </td>
                             <td>
-                                <strong>Status:</strong> <?= $He[status] ?>
+                                <strong>Status:</strong> <?= $He["status"] ?>
                             </td>
                             <td align='right'>
                                 <strong>Importe:</strong> $ <?= number_format($He["importe"], "2") ?> 
@@ -280,14 +280,14 @@ require ("config.php");          //Parametros de colores;
                             $tt = mysql_fetch_array($s2);
                             ?>
                             <tr bgcolor="#<?= $Fdo ?>" height='25px'>
-                                <td align='center'><?= $rst[orden] ?></td>
-                                <td align='center'><?= $rst[estudio] ?></td>
-                                <td align='center'><?= $rst[descripcion] ?></td>
-                                <td align='center'><?= $rst[cantidad] ?></td>
-                                <td align='center'><?= $rst[precio] ?></td>
-                                <td align='center'><?= $tt[descuento] ?></td>
-                                <td align='center'><?= $rst[descuento] ?></td>
-                                <td align='center'><?= $rst[importe] ?></td>
+                                <td align='center'><?= $rst["orden"] ?></td>
+                                <td align='center'><?= $rst["estudio"] ?></td>
+                                <td align='center'><?= $rst["descripcion"] ?></td>
+                                <td align='center'><?= $rst["cantidad"] ?></td>
+                                <td align='center'><?= $rst["precio"] ?></td>
+                                <td align='center'><?= $tt["descuento"] ?></td>
+                                <td align='center'><?= $rst["descuento"] ?></td>
+                                <td align='center'><?= $rst["importe"] ?></td>
                                 <?php
                                 if ($He["status"] === "Timbrada") {
                                     echo "<td></td><td></td>";
@@ -299,7 +299,7 @@ require ("config.php");          //Parametros de colores;
                                             <input style="width:40px;" type="number" name="DescuentoEstudio" class="letrap"></input>
                                             <input type="submit" name="Boton" value="Desc" class="letrap"></input>
                                             <input type="hidden" name="busca" value="<?= $busca ?>"></input>
-                                            <input type="hidden" name="Idnvo" value="<?= $rst[idnvo] ?>"></input>
+                                            <input type="hidden" name="Idnvo" value="<?= $rst["idnvo"] ?>"></input>
                                         </form>
                                     </td>
                                 <?php }
@@ -325,7 +325,7 @@ require ("config.php");          //Parametros de colores;
                             <td valign="middle" >
                                 <form  name='form1' method='get' action="<?= $_SERVER['PHP_SELF'] ?>" onSubmit='return ValCampos();'>
                                     <?php
-                                    if ($He[importe] > 0 && $He[status] === "Abierta") {
+                                    if ($He["importe"] > 0 && $He["status"] === "Abierta") {
                                         ?>
                                         <input type='hidden' name='busca' value='<?= $busca ?>'/>
                                         <a class='edit' href='genfactura40.php?busca=<?= $busca ?>&Certificados=LCD'>GENERAR LA FACTURA <i class="fa fa-thumbs-up fa-2x" aria-hidden="true"></i></a> 
@@ -354,7 +354,7 @@ require ("config.php");          //Parametros de colores;
                                         <?php
                                         $InsA = mysql_query("SELECT institucion,nombre FROM  inst");
                                         while ($Ins = mysql_fetch_array($InsA)) {
-                                            echo "<option value='$Ins[institucion]'>" . ucwords(strtolower(substr($Ins[nombre], 0, 30))) . "</option>";
+                                            echo "<option value='".$Ins["institucion"]."'>" . ucwords(strtolower(substr($Ins["nombre"], 0, 30))) . "</option>";
                                         }
                                         ?>
                                         <option selected value=''>Selecciona la institucion</option>
@@ -365,7 +365,7 @@ require ("config.php");          //Parametros de colores;
                                         <?php
                                         $Depto = mysql_query("SELECT departamento,nombre FROM dep");
                                         while ($Depto1 = mysql_fetch_array($Depto)) {
-                                            echo "<option value='$Depto1[departamento]'>" . ucwords(strtolower($Depto1[nombre])) . "</option>";
+                                            echo "<option value='".$Depto1["departamento"]."'>" . ucwords(strtolower($Depto1["nombre"])) . "</option>";
                                         }
                                         ?>
                                         <option selected value=''>Departamento</option>
@@ -402,10 +402,10 @@ function Totaliza($busca) { //busca es idnvo de medt y cVarVal es id de la entra
         $Total = 0;
     } else {
 
-        $Cnt = $Ddd[cantidad];
-        $Importe = $Ddd[PrecioSinIva];
-        $Iva = $Ddd[iva];
-        $Total = $Ddd[total];
+        $Cnt = $Ddd["cantidad"];
+        $Importe = $Ddd["PrecioSinIva"];
+        $Iva = $Ddd["iva"];
+        $Total = $Ddd["total"];
     }
     $lUp = mysql_query("UPDATE fc SET cantidad=$Cnt,importe = $Importe, iva=$Iva, total= $Total WHERE id=$busca");
 }

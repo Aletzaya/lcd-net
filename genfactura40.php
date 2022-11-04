@@ -74,10 +74,8 @@ $Titulo = "Favor de confirmar sus datos";
 $lBd = false;
 $Msj = $queryParameters['Msj'];
 
-
 $_SESSION['cVar'] = 0;
 $lBd = true;
-
 
 if ($queryParameters['Boton'] == 'Guardar estos cambios') {
 
@@ -118,13 +116,12 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
         $keyfile = "certificado2/key.pem";
         $cerfile = "certificado2/cer.pem";
     }
-
+    
     if (count($facturaDetisa->getComprobante()->getConceptos()->getConcepto()) == 0) {
         $Msj = "El comprobante no tiene conceptos, no es posible timbrar un comprobante sin conceptos. Favor de verificar";
     } else if (!file_exists($keyfile) || !file_exists($cerfile)) {
         $Msj = "No se encontraron los certificados. Favor de notificar a Soporte";
     } else {
-
         $showMissingCertificates = false;
         if (file_exists($keyfile) && file_exists($cerfile)) {
             $csd = new com\softcoatl\security\commons\Certificate(file_get_contents($cerfile), file_get_contents($keyfile), $cia->getFacclavesat());
@@ -142,6 +139,8 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
             } else {
                 $service = new com\detifac\services\TimbradoService();
                 $xmlCFDI = $service->doin($facturaDetisa->getComprobante(), $csd);
+                $Msj = $service->getError();
+                $facturaDetisa->getComprobante()->asXML()->save("/home/omicrom/xml/prbCP.xml");
                 try {
                     if ($xmlCFDI) {
                         $comprobanteTimbrado = (new ComprobanteResolver())->resolve($xmlCFDI);
@@ -165,7 +164,7 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
             }
         }
     }
-    header("Location: facturas.php?busca=ini&Msj=$Msj");
+    header("Location: facturas40.php?busca=ini&Msj=$Msj");
     /*     * ********************************************************************************************************************************************************* */
 }
 
@@ -182,7 +181,7 @@ $Gmenu = $_SESSION["Usr"][5];
         <meta charset="UTF-8">
 
         <title>Genera Factura</title>
-<?php require ("config_add.php"); ?>
+        <?php require ("config_add.php"); ?>
     </head>
     <body leftmargin='<?= $MagenIzq ?>' topmargin='<?= $MargenAlt ?>' marginwidth='<?= $MargenIzq ?>' marginheight='<?= $MargenAlt ?>'>
         <?php
@@ -195,16 +194,16 @@ $Gmenu = $_SESSION["Usr"][5];
                 <td align='center'>
                     <form name='form1' method='get' action="<?= $_SERVER['PHP_SELF'] ?>" onSubmit='return ValCampos();'>
 
-<?php
-$HeA = mysql_query("SELECT fc.id,fc.cliente,clif.nombre,clif.direccion,clif.rfc,clif.codigo,
+                        <?php
+                        $HeA = mysql_query("SELECT fc.id,fc.cliente,clif.nombre,clif.direccion,clif.rfc,clif.codigo,
          clif.correo,fc.fecha,clif.enviarcorreo,fc.usocfdi,clif.municipio,fc.total,fc.iva,
          fc.formadepago,fc.importe,fc.observaciones,fc.metododepago
          FROM fc LEFT JOIN clif ON fc.cliente=clif.id
          WHERE fc.id='$busca'");
 
-$He = mysql_fetch_array($HeA);
-$Nom = utf8_encode($He[nombre]);
-?>  
+                        $He = mysql_fetch_array($HeA);
+//$Nom = utf8_encode($He[nombre]);
+                        ?>  
                         <table bgcolor="#D5D8DC" width='60%' border='0' align='center' cellpadding='0' cellspacing='0' class='letrap' style='border:#566573 1px solid;'>
                             <tr>
                                 <td colspan="2" align="center" bgcolor="#E59866"><h2>Verificar datos del cliente</h2></td>
@@ -230,18 +229,18 @@ $Nom = utf8_encode($He[nombre]);
                                     <input type='text' name='Codigo' value='<?= $He[codigo] ?>' class='letrap' size='5' onBLur=Mayusculas('Codigo')>
                             <tr style="height: 25px;">
                                 <td align="right"><small style="color:#FF0000";>*</small> Uso de CFDI: </td><td>
-<?php
-echo "<select class='letrap' name='Usocfdi'>";
-$UsoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_uso ORDER BY clave");
-while ($rg = mysql_fetch_array($UsoA)) {
-    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
-    if ($He[usocfdi] == $rg[clave]) {
-        $Display = $rg[descripcion];
-    }
-}
-echo "<option value='$He[usocfdi]' selected>$Display</option>";
-echo "</select>";
-?>                        
+                                    <?php
+                                    echo "<select class='letrap' name='Usocfdi'>";
+                                    $UsoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_uso ORDER BY clave");
+                                    while ($rg = mysql_fetch_array($UsoA)) {
+                                        echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
+                                        if ($He[usocfdi] == $rg[clave]) {
+                                            $Display = $rg[descripcion];
+                                        }
+                                    }
+                                    echo "<option value='$He[usocfdi]' selected>$Display</option>";
+                                    echo "</select>";
+                                    ?>                        
                                 </td>
                             </tr>                        
                             <!--<tr>
@@ -249,38 +248,38 @@ echo "</select>";
                                 <td align="left">
                                     <input type="text" class="letrap" name="Relacioncfdi" id="Relacioncfdi" class="texto_tablas" size="10"/>
                                     En caso de ser necesario</small>
-<?php //ComboboxTipoRelacion::generate('tiporelacion');      ?>
+                            <?php //ComboboxTipoRelacion::generate('tiporelacion');       ?>
                                 </td>
                             </tr> -->
                             <tr style="height: 25px;">
                                 <td align="right"><small style="color:#FF0000";>*</small> M&eacute;todo de pago: &nbsp;</td>
                                 <td align="left">
-<?php
-echo "<select class='letrap' name='Metododepago'>";
-$MpagoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_mpago ORDER BY clave");
-while ($rg = mysql_fetch_array($MpagoA)) {
-    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
-    if ($He[metododepago] == $rg[clave]) {
-        $Display = $rg[descripcion];
-    }
-}
-echo "<option value='$He[metododepago]' selected>$Display</option>";
-echo "</select> &nbsp ";
-?>
+                                    <?php
+                                    echo "<select class='letrap' name='Metododepago'>";
+                                    $MpagoA = mysql_query("SELECT clave,descripcion FROM cfdi33_c_mpago ORDER BY clave");
+                                    while ($rg = mysql_fetch_array($MpagoA)) {
+                                        echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[descripcion] . "</option>";
+                                        if ($He[metododepago] == $rg[clave]) {
+                                            $Display = $rg[descripcion];
+                                        }
+                                    }
+                                    echo "<option value='$He[metododepago]' selected>$Display</option>";
+                                    echo "</select> &nbsp ";
+                                    ?>
                                 </td>
                             </tr>
                             <tr style="height: 25px;">
                                 <td align='right'><small style="color:#FF0000";>*</small> Forma de pago:</td><td>
                                     <select class='letrap' name='Formadepago'>
-<?php
-$Pagos = mysql_query("SELECT * FROM cpagos ORDER BY clave");
-while ($rg = mysql_fetch_array($Pagos)) {
-    echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[concepto] . "</option>";
-    if ($He[formadepago] == $rg[clave]) {
-        $Display = $rg[concepto];
-    }
-}
-?>
+                                        <?php
+                                        $Pagos = mysql_query("SELECT * FROM cpagos ORDER BY clave");
+                                        while ($rg = mysql_fetch_array($Pagos)) {
+                                            echo "<option value='$rg[clave]'>" . $rg[clave] . " | " . $rg[concepto] . "</option>";
+                                            if ($He[formadepago] == $rg[clave]) {
+                                                $Display = $rg[concepto];
+                                            }
+                                        }
+                                        ?>
                                         <option value='<?= $He[formadepago] ?>' selected><?= $Display ?></option>
                                     </select>
                                     Observaciones: 
@@ -289,13 +288,13 @@ while ($rg = mysql_fetch_array($Pagos)) {
 
                             <tr style="height: 25px;"><td align='right'>Correo electronico: &nbsp;</td><td>
                                     <input type='text' name='Correo' value='<?= $He[correo] ?>' class='letrap' size='50'> &nbsp; enviar correo
-<?php
-if ($He[enviarcorreo] == 'Si') {
-    echo "<input type='checkbox' class='botonAnimated' name='Enviarcorreo' value='Si' checked>";
-} else {
-    echo "<input type='checkbox'  class='botonAnimated' name='Enviarcorreo' value='Si'>";
-}
-?>
+                                    <?php
+                                    if ($He[enviarcorreo] == 'Si') {
+                                        echo "<input type='checkbox' class='botonAnimated' name='Enviarcorreo' value='Si' checked>";
+                                    } else {
+                                        echo "<input type='checkbox'  class='botonAnimated' name='Enviarcorreo' value='Si'>";
+                                    }
+                                    ?>
                                 </td></tr>
                             <tr style="height: 25px;">
                                 <td align='center' colspan="2">
@@ -308,49 +307,49 @@ if ($He[enviarcorreo] == 'Si') {
                         <table width="100%"><tr><td align="right"><a href='facturas.php' class='content5' ><i class='fa fa-reply fa-2x' aria-hidden='true'></i> Regresar </a></td></tr></table>
                     </form>
 
-<?php
-echo "<table width='90%' border='0' align='center' cellpadding='3' cellspacing='0' class='letrap' style='border:#566573 1px solid; border-radius: .1em;'>";
-echo "<tr bgcolor='#7DCEA0'><td align='center' colspan='7'><h1 class='letrap'>PRODUCTOS A FACTURAR</h1></td></tr>";
-echo "<tr bgcolor='#45B39D'>";
-echo "<th>Producto</th>";
-echo "<th>Descripcion</th>";
-echo "<th>Cantidad</th>";
-echo "<th>Precio</th>";
-echo "<th>Descuento</th>";
-echo "<th>Importe</th>";
-echo "<th>Total</th>";
-echo "</tr>";
+                    <?php
+                    echo "<table width='90%' border='0' align='center' cellpadding='3' cellspacing='0' class='letrap' style='border:#566573 1px solid; border-radius: .1em;'>";
+                    echo "<tr bgcolor='#7DCEA0'><td align='center' colspan='7'><h1 class='letrap'>PRODUCTOS A FACTURAR</h1></td></tr>";
+                    echo "<tr bgcolor='#45B39D'>";
+                    echo "<th>Producto</th>";
+                    echo "<th>Descripcion</th>";
+                    echo "<th>Cantidad</th>";
+                    echo "<th>Precio</th>";
+                    echo "<th>Descuento</th>";
+                    echo "<th>Importe</th>";
+                    echo "<th>Total</th>";
+                    echo "</tr>";
 
-$CpoA = mysql_query("SELECT fcd.estudio,est.descripcion,fcd.precio,fcd.iva,
+                    $CpoA = mysql_query("SELECT fcd.estudio,est.descripcion,fcd.precio,fcd.iva,
                                  fcd.importe,fcd.descuento,fcd.cantidad
                                  FROM fcd LEFT JOIN est ON fcd.estudio=est.estudio
                                  WHERE fcd.id='$busca' ORDER BY fcd.idnvo");
-while ($rg = mysql_fetch_array($CpoA)) {
-    if (($nRng % 2) > 0) {
-        $Fdo = 'FFFFFF';
-    } else {
-        $Fdo = $Gfdogrid;
-    }    //El resto de la division;
+                    while ($rg = mysql_fetch_array($CpoA)) {
+                        if (($nRng % 2) > 0) {
+                            $Fdo = 'FFFFFF';
+                        } else {
+                            $Fdo = $Gfdogrid;
+                        }    //El resto de la division;
 
-    echo "<tr bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
+                        echo "<tr bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
 
-    echo "<td align='left'> $rg[estudio] </td>";
-    echo "<td align='left'> $rg[descripcion] </td>";
-    echo "<td align='right'> $rg[cantidad] </td>";
-    echo "<td align='right'> " . number_format($rg[precio], "2") . " </td>";
-    echo "<td align='right'> " . number_format($rg[descuento], "2") . " </td>";
-    echo "<td align='right'> " . number_format($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100))), "2") . " </td>";
-    echo "<td align='right'> " . number_format(($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100)))) * (1 + ($rg["iva"] / 100)), "2") . " </td>";
-    echo "</tr>";
-    $sumPrecio += $rg["precio"];
-    $sumPrecioIva += $rg["precio"] * ($rg["iva"] / 100);
-    $sumConDescuento += $rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)));
-    $sumTotal += ($rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)))) * (1 + ($rg["iva"] / 100));
-    $nRng++;
-}
+                        echo "<td align='left'> $rg[estudio] </td>";
+                        echo "<td align='left'> $rg[descripcion] </td>";
+                        echo "<td align='right'> $rg[cantidad] </td>";
+                        echo "<td align='right'> " . number_format($rg[precio], "2") . " </td>";
+                        echo "<td align='right'> " . number_format($rg[descuento], "2") . " </td>";
+                        echo "<td align='right'> " . number_format($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100))), "2") . " </td>";
+                        echo "<td align='right'> " . number_format(($rg[cantidad] * ($rg[precio] * (1 - ($rg[descuento] / 100)))) * (1 + ($rg["iva"] / 100)), "2") . " </td>";
+                        echo "</tr>";
+                        $sumPrecio += $rg["precio"];
+                        $sumPrecioIva += $rg["precio"] * ($rg["iva"] / 100);
+                        $sumConDescuento += $rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)));
+                        $sumTotal += ($rg["cantidad"] * ($rg["precio"] * (1 - ($rg["descuento"] / 100)))) * (1 + ($rg["iva"] / 100));
+                        $nRng++;
+                    }
 
-echo "</table><br>";
-?>
+                    echo "</table><br>";
+                    ?>
                     <table width='90%' border='0' align='center' cellpadding='1' cellspacing='2' class='letrap' style='border:#566573 1px solid;'>
                         <tr bgcolor='#c1c1c1'>
                             <th align='right' width="70%">Sub-total $ <?= number_format($He[importe], "2") ?></th>
@@ -379,9 +378,9 @@ echo "</table><br>";
             </tr>
         </table>
 
-<?php
-CuadroInferior($busca);      #-------------------Siempre debe de estar por que cierra la tabla principal .
-?>
+        <?php
+        CuadroInferior($busca);      #-------------------Siempre debe de estar por que cierra la tabla principal .
+        ?>
     </body>
 
 </html>

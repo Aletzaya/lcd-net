@@ -23,7 +23,7 @@ class PDFGenerator {
 
     public static function generate($factura, $tipo, $rfc, $addrEmisor = NULL, $addrReceptor = NULL) {
 
-        if ($factura->getVersion() !== "3.2") {
+        if ($factura->getVersion() === "4.0") {
             error_log("Generando PDF para " . $factura->getTimbreFiscalDigital()->getUUID());
             return (new PDFTransformer())->getPDF($factura, self::getTipo($tipo), "S", '', "./", $addrEmisor, $addrReceptor);
         }

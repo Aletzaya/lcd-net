@@ -30,31 +30,37 @@ class SifeiException {
     function exists() {
         return !empty($this->sifeiException);
     }
+
     function is($code) {
-        return $this->code()==$code;
+        return $this->code() == $code;
     }
+
     function code() {
         return $this->sifeiException['codigo'];
     }
+
     function error() {
         return $this->sifeiException['error'];
     }
+
     function message() {
         return $this->sifeiException['mensaje'];
     }
+
     function toHTML() {
         return "<b>ERROR REPORTADO POR EL SAT (" . $this->code() . ")<br/>" . $this->error() . ".</b><br>" . $this->message();
     }
+
 }
 
 abstract class SifeiCaller {
 
     public static $ns = "http://MApeados/";
-
     protected $pac;
     protected $parameters;
     protected $response;
-    /** @var \nusoap_client*/
+
+    /** @var \nusoap_client */
     protected $soapClient;
     protected $soapException;
     protected $sifeException;
@@ -96,8 +102,7 @@ abstract class SifeiCaller {
     }
 
     public function success() {
-        return !$this->sifeiError()
-                && !$this->soapError();
+        return !$this->sifeiError() && !$this->soapError();
     }
 
     public function errorCode($code) {
@@ -109,14 +114,15 @@ abstract class SifeiCaller {
     }
 
     public function getHTMLError() {
-        return $this->sifeiError() ? 
-                $this->sifeException->toHTML() : 
+        return $this->sifeiError() ?
+                $this->sifeException->toHTML() :
                 "<b>ERROR<br/>" . explode("<br>", $this->soapException)[0];
     }
 
     public function getResponse($field = "return") {
         return $this->response[$field];
     }
+
 }
 
 class SifeiGetCFDICaller extends SifeiCaller {
@@ -126,10 +132,10 @@ class SifeiGetCFDICaller extends SifeiCaller {
     function __construct($pac) {
         parent::__construct($pac);
         $this
-            ->setParameter("Usuario", $this->pac->getUser())
-            ->setParameter("Password", $this->pac->getPassword())
-            ->setParameter("Serie", $this->pac->getSerie())
-            ->setParameter("IdEquipo", $this->pac->getIdEquipo());  
+                ->setParameter("Usuario", $this->pac->getUser())
+                ->setParameter("Password", $this->pac->getPassword())
+                ->setParameter("Serie", $this->pac->getSerie())
+                ->setParameter("IdEquipo", $this->pac->getIdEquipo());
         $this->soapClient = SOAPClient::getClient($this->pac->getUrl());
     }
 
@@ -137,6 +143,7 @@ class SifeiGetCFDICaller extends SifeiCaller {
         parent::invoke(static::$operation);
         return $this;
     }
+
 }
 
 class SifeiGetXMLCaller extends SifeiCaller {
@@ -146,8 +153,8 @@ class SifeiGetXMLCaller extends SifeiCaller {
     function __construct($pac) {
         parent::__construct($pac);
         $this
-            ->setParameter("rfc", $this->pac->getUser())
-            ->setParameter("pass", $this->pac->getPassword());  
+                ->setParameter("rfc", $this->pac->getUser())
+                ->setParameter("pass", $this->pac->getPassword());
         $this->soapClient = SOAPClient::getClient($this->pac->getUrl());
     }
 
@@ -155,17 +162,18 @@ class SifeiGetXMLCaller extends SifeiCaller {
         parent::invoke(static::$operation);
         return $this;
     }
+
 }
 
 class SifeiCancelaCFDICaller extends SifeiCaller {
-    
+
     private static $operation = "cancelaCFDI";
 
     function __construct($pac) {
         parent::__construct($pac);
         $this
-            ->setParameter("usuarioSIFEI", $this->pac->getUser())
-            ->setParameter("passwordSifei", $this->pac->getPassword());  
+                ->setParameter("usuarioSIFEI", $this->pac->getUser())
+                ->setParameter("passwordSifei", $this->pac->getPassword());
         $this->soapClient = SOAPClient::getClient($this->pac->getUrlCancelacion());
     }
 
@@ -173,17 +181,18 @@ class SifeiCancelaCFDICaller extends SifeiCaller {
         parent::invoke(static::$operation);
         return $this;
     }
+
 }
 
 class SifeiCfdiRelacionadoCaller extends SifeiCaller {
-    
+
     private static $operation = "cfdiRelacionado";
 
     function __construct($pac) {
         parent::__construct($pac);
         $this
-            ->setParameter("usuarioSIFEI", $this->pac->getUser())
-            ->setParameter("passwordSifei", $this->pac->getPassword());  
+                ->setParameter("usuarioSIFEI", $this->pac->getUser())
+                ->setParameter("passwordSifei", $this->pac->getPassword());
         $this->soapClient = SOAPClient::getClient($this->pac->getUrl());
     }
 
@@ -191,6 +200,7 @@ class SifeiCfdiRelacionadoCaller extends SifeiCaller {
         parent::invoke(static::$operation);
         return $this;
     }
+
 }
 
 class SifeiService extends BasePACService {
@@ -202,7 +212,7 @@ class SifeiService extends BasePACService {
     private function zip($xmlCFDI) {
 
         $file = tempnam("tmp", "zip");
-        error_log("Zipping into file " . $file);   
+        error_log("Zipping into file " . $file);
         $zip = new \ZipArchive();
         if ($zip->open($file, \ZipArchive::OVERWRITE)) {
 
@@ -220,7 +230,7 @@ class SifeiService extends BasePACService {
     private function unzip($xmlCFDIZipped) {
 
         $file = tempnam("tmp", "zip");
-        error_log("Unzipping into file " . $file);   
+        error_log("Unzipping into file " . $file);
         file_put_contents($file, $xmlCFDIZipped);
         $zip = new \ZipArchive();
         if ($zip->open($file)) {
@@ -269,12 +279,13 @@ class SifeiService extends BasePACService {
             error_log("Timbrando correctamente");
             return $this->unzip(base64_decode($sifei->getResponse()));
         } else if ($sifei->errorCode(307)) {
-            if (($timbre = $this->getTimbre($cfdi))!==false) {
+            if (($timbre = $this->getTimbre($cfdi)) !== false) {
                 error_log("Comprobante previamente timbrado.");
                 return $this->appendTFD($cfdi->asXML()->saveXML(), $timbre);
             }
         } else {
             $this->error = $sifei->getHTMLError();
+            error_log("Se tiene un error " . $this->error);
         }
 
         return false;
@@ -294,7 +305,9 @@ class SifeiService extends BasePACService {
         }
 
         return false;
-    }//getTimbre
+    }
+
+//getTimbre
 
     public function cancelaComprobante($rfcEmisor, Cancelation $cancelation, Certificate $certificate) {
 
@@ -307,11 +320,11 @@ class SifeiService extends BasePACService {
                 ->call();
         if ($sifei->success()) {
 
-            error_log("Comprobante ". $cancelation->getCancelationString() . " cancelado");
+            error_log("Comprobante " . $cancelation->getCancelationString() . " cancelado");
             return $sifei->getResponse();
         } else {
 
-            $this->error = $sifei->getHTMLError();            
+            $this->error = $sifei->getHTMLError();
             error_log("Error cancelando " . $this->error);
         }
 
@@ -320,5 +333,6 @@ class SifeiService extends BasePACService {
 
     public function getAcuseCancelacion($rfcEmisor, Cancelation $cancelation, Certificate $certificate) {
         $this->cancelaComprobante($rfcEmisor, $cancelation, $certificate);
-    }   
+    }
+
 }

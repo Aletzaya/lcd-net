@@ -15,6 +15,8 @@ use com\softcoatl\cfdi\utils\pac\PACServiceFactory;
 
 class TimbradoService implements Service {
 
+    private $error;
+
     private function sellaComprobante(Comprobante $comprobante, Certificate $certificate) {
 
         $sello = new SelloCFDI($certificate);
@@ -33,13 +35,17 @@ class TimbradoService implements Service {
         $service = PACServiceFactory::getPACService($pac);
         $xml = $service->timbraComprobante($this->sellaComprobante($parameters[0], $parameters[1]));
         if ($xml === false) {
-            error_log($service->getError());
             //throw new \Exception($service->getError());
+            $this->error = $service->getError();
             return false;
         }
 
         error_log($xml);
         return $xml;
+    }
+
+    public function getError() {
+        return $this->error;
     }
 
 }

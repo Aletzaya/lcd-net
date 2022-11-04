@@ -49,6 +49,14 @@ class PDFTransformer {
                 . "</thead>"
                 . "<tbody>";
 
+//        /* @var $Concepto com\softcoatl\cfdi\v40\schema\Comprobante40\InformacionGlobal */
+//        foreach ($Comprobante->getInformacionGlobal() as $Concepto) {
+//            $html .= "<tr style=\"font-size: 8; text-align: center;\">"
+//                    . "<td style=\"width: 2cm;\">" . $Concepto->getAnio() . "</td>"
+//                    . "<td style=\"width: 5.5cm;\">" . $Concepto->getMeses() . "</td>"
+//                    . "<td style=\"width: 5cm;\">" . $Concepto->getPeriodicidad() . "</td>"
+//                    . "</tr>";
+//        }
         /* @var $Concepto Comprobante33\Conceptos\Concepto */
         foreach ($Comprobante->getConceptos()->getConcepto() as $Concepto) {
             $html .= "<tr style=\"font-size: 8; text-align: center;\">"
@@ -63,7 +71,7 @@ class PDFTransformer {
         $html .= "</tbody></table>";
 
         $pdf->setComprobante($Comprobante);
-        $pdf->setLogo(file_get_contents('img/logo.png'));
+        $pdf->setLogo(file_get_contents('logo.png'));
         $pdf->setDoc($doc);
 
         $pdf->SetCreator(PDF_CREATOR);
@@ -255,7 +263,7 @@ class CUSTOM_PDF extends TCPDF {
                 . "<td>"
                 . "<table style=\"width: 100%;\">"
                 . "<tr>"
-                . "<td style=\"width: 4cm;\"><img style=\"min-width: 3.5cm; max-width: 3.5cm; height: 3cm;\" src=\"data:image/png;base64, " . base64_encode($this->logo) . "\"/></td>"
+                . "<td style=\"width: 4cm;\"><img style=\"min-width: 3.5cm; max-width: 5.5cm; height: 3cm;\" src=\"lib/DuranFact.png\"/></td>"
                 . "<td style=\"text-align: center; width: 9.5cm;\"><b>"
                 . $this->Comprobante->getEmisor()->getNombre() . "<br/>"
                 . "RFC:" . $this->Comprobante->getEmisor()->getRfc() . "</b><br/>"
@@ -301,6 +309,7 @@ class CUSTOM_PDF extends TCPDF {
                 . "<tr><td><b>Forma de Pago</b></td><td colspan=\"3\"><b>" . $this->Comprobante->getFormaPago() . "</b> - " . $this->decodeFormaPago($this->Comprobante->getFormaPago()) . "</td></tr>"
                 . "<tr><td><b>Método de Pago</b></td><td colspan=\"3\"><b>" . $this->Comprobante->getMetodoPago() . "</b> - " . $this->decodeMetodoPago($this->Comprobante->getMetodoPago()) . "</td></tr>"
                 . ( empty($this->Comprobante->getCondicionesDePago()) ? "" : "<tr><td><b>Condiciones</b></td><td colspan=\"3\">" . $this->Comprobante->getCondicionesDePago() . "</td></tr>" )
+                . "<tr><td><b>Versión CFDI</b></td><td colspan=\"3\">" . $this->Comprobante->getVersion() . "</td></tr>"
                 . "<tr><td><b>Versión CFDI</b></td><td colspan=\"3\">" . $this->Comprobante->getVersion() . "</td></tr>"
                 . "</table>"
                 . "</td>"

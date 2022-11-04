@@ -16,9 +16,10 @@ namespace com\detisa\omicrom {
     require_once ('DocumentoCFDIDetifac.php');
     require_once ('lib/PDFGenerator.php');
     require_once ("cfdi/factory/ComprobanteFactory.php");
+    require_once ("cfdi/factory/Comprobante40Factory.php");
     require_once ('cfdi/com/softcoatl/cfdi/Comprobante.php');
 
-    //require_once ('cfdi/com/softcoatl/cfdi/addenda/detisa/Observaciones.php');
+//require_once ('cfdi/com/softcoatl/cfdi/addenda/detisa/Observaciones.php');
 
     use com\softcoatl\cfdi\Comprobante;
     use com\detisa\cfdi\factory\ComprobanteFactoryIface;
@@ -34,6 +35,7 @@ namespace com\detisa\omicrom {
         private $mysqlConnection;
         protected $factory;
         private $xmlTimbrado;
+        private $Total;
 
         function __construct($folio) {
 
@@ -49,7 +51,7 @@ namespace com\detisa\omicrom {
             $this->comprobante();
             $this->emisor();
             $this->receptor();
-            //$this->cfdiRelacionados();
+//$this->cfdiRelacionados();
             $this->conceptos();
             $this->impuestos();
 //                    ->observaciones();
@@ -85,12 +87,20 @@ namespace com\detisa\omicrom {
             $this->comprobante = $comprobante;
         }
 
+        function setTotal($total) {
+            $this->comprobante = $total;
+        }
+
+        function getTotal() {
+            return $this->Total;
+        }
+
         /**
          * 
          * @throws \com\detisa\omicrom\Exception
          */
         private function comprobante() {
-
+            $this->mysqlConnection->query("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
             $sql = "SELECT 
                     fc.id, 
                     DATE_FORMAT(fc.fecha, '%Y-%m-%dT%H:%h:%i') Fecha, 
@@ -103,12 +113,16 @@ namespace com\detisa\omicrom {
                     '4.0' Version,
                     CAST( fc.total AS DECIMAL( 12, 2 ) )  Total,
                     CAST( fc.importe AS DECIMAL( 12, 2 ) ) SubTotal,
-                    cia.codigo LugarExpedicion
+                    cia.codigo LugarExpedicion,
+                    fc.anio,fc.mes,fc.periodo
                     FROM fc JOIN cia ON cia.id = 1
                     WHERE fc.id = " . $this->folio;
-
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_array())) {
                 $this->comprobante = $this->factory->createComprobante($rs);
+                $this->Total = $rs["Total"];
+                if ($rs["anio"] > 2000) {
+                    $this->comprobante->setInformacionGlobal($this->factory->createInfoGlobal(["Mes" => $rs["mes"], "Anio" => $rs["anio"], "Periodo" => $rs["periodo"]]));
+                }
             }
             return $this;
         }
@@ -138,8 +152,8 @@ namespace com\detisa\omicrom {
          */
         private function receptor() {
 
-            $sql = "SELECT clif.nombre Nombre, clif.rfc Rfc, fc.usocfdi UsoCFDI,regimenFiscal RegimenFiscalReceptor,"
-                    . "codigo DomicilioFiscalReceptor "
+            $sql = "SELECT clif.nombre Nombre1, clif.rfc Rfc, fc.usocfdi UsoCFDI,regimenFiscal RegimenFiscalReceptor,"
+                    . "codigo DomicilioFiscalReceptor,if(clif.id=5,'PUBLICO EN GENERAL', clif.nombre) Nombre "
                     . " FROM fc JOIN clif ON fc.cliente = clif.id WHERE fc.id = " . $this->folio;
 
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
@@ -157,7 +171,6 @@ namespace com\detisa\omicrom {
         private function cfdiRelacionados() {
 
             $cfdiRelacionados = $this->factory->createComprobanteCfdiRelacionados();
-
 
             $sql = "
                 SELECT F.id, IFNULL(F.tiporelacion,  '') tiporelacion, IFNULL(R.id,  '') rfolio, IFNULL(R.uuid,  '') ruuid
@@ -201,24 +214,26 @@ namespace com\detisa\omicrom {
                    WHERE fcd.id = " . $this->folio . " AND fcd.estudio = est.estudio";
 
             $total = 0.00;
+            $difference = 0.00;
 
             if (($query = $this->mysqlConnection->query($sql))) {
-
+                $difference = round($this->comprobante->getTotal(), 2);
                 while (($rs = $query->fetch_assoc())) {
                     $concepto = $this->factory->createComprobanteConceptosConcepto($rs);
 
                     $subTotal += round($rs['ValorUnitario'], 2);
-                    $Total += round($rs['Importe'], 2);
+                    $Total += round($rs['Importe'], 3);
+                    $ImporteIndividual = round($rs['Importe'], 3);
                     $trasladados = array();
                     $retenidos = array();
                     if ($rs["tax_iva"] > 0) {
-                        $Imp = number_format(round($rs['tax_iva'], 2), 2, '.', '');
+                        $Imp = round($rs['tax_iva'], 2);
                         $trasladados[] = $this->factory->createComprobanteConceptosConceptoImpuestosTrasladosTraslado([
                             "Base" => $rs["ValorUnitario"],
                             "Impuesto" => "002",
                             "TasaOCuota" => $rs["factoriva"],
                             "TipoFactor" => "Tasa",
-                            "Importe" => $Imp]);
+                            "Importe" => number_format($Imp, 2, '.', '')]);
                     }
                     $Impuestos = $this->factory->createComprobanteConceptosConceptoImpuestos();
 
@@ -232,14 +247,15 @@ namespace com\detisa\omicrom {
                     }
 
                     $conceptos->addConcepto($concepto);
-                    $difference = round($this->comprobante->getTotal() - $Total, 2);
+                    $difference = round($difference, 2) - round($ImporteIndividual, 2);
                     if (abs($difference) > 0.001) {
-                        error_log("There is a difference " . $difference);
+                        error_log("There is a difference " . $difference . " Desc " . $rs["Descripcion"]);
                         $this->comprobante->setTotal(number_format($Total, 2, ".", ""));
                         $this->comprobante->setSubTotal(number_format($subTotal, 2, ".", ""));
                     } else {
                         error_log("Equals totals");
                     }
+                    $this->comprobante->setTotal($this->impuestos()->getTotal());
                     $this->comprobante->setConceptos($conceptos);
                 }//while
             }
@@ -252,15 +268,14 @@ namespace com\detisa\omicrom {
          * 
          * @throws \com\detisa\omicrom\Exception
          */
-        //Agrupa la suma de los impuestos por tasa
+//Agrupa la suma de los impuestos por tasa
         private function impuestos() {
             $trasladados = array();
             $retenidos = array();
-
             $total_traslado = 0.00;
             $sql = "
                 SELECT 
-                    SUM(round(importe-precio,2)) ValorIva, precio,
+                    SUM(round(importe-precio,2)) ValorIva, SUM(precio) precio,
                     CAST( fcd.iva /100 AS DECIMAL( 10, 6 ) ) factoriva,
                     SUM( ROUND( fcd.cantidad * fcd.precio * CAST( fcd.iva /100 AS DECIMAL( 10, 6 ) ), 2 ) ) tax_iva
                     FROM fcd, est
@@ -268,7 +283,6 @@ namespace com\detisa\omicrom {
                     AND fcd.estudio = est.estudio
                     GROUP BY factoriva";
             $total_traslado = 0.00;
-
             if (($query = $this->mysqlConnection->query($sql))) {
                 while (($rs = $query->fetch_assoc())) {
                     $trasladados[] = $this->factory->createComprobanteImpuestosTrasladosTraslado([
@@ -282,7 +296,8 @@ namespace com\detisa\omicrom {
                 }
 
                 $impuestos = $this->factory->createComprobanteImpuestos();
-
+                error_log("TRASLADOS _");
+                error_log(count($trasladados));
                 if (count($trasladados) > 0) {
                     $traslados = $this->factory->createComprobanteImpuestosTraslados();
                     $traslados->setTraslado($trasladados);
@@ -368,14 +383,11 @@ namespace com\detisa\omicrom {
 
             $sql = "INSERT INTO facturas (cfdi_xml, pdf_format, fecha_emision, fecha_timbrado, clave_pac, id_fc_fk, emisor, receptor, uuid)"
                     . " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            error_log("ERRRORRRR" . $sql);
-            $pdf = \PDFGenerator::generate($Comprobante, 1, "");
+            $pdf = null;
             $DOM = $Comprobante->asXML();
             $xml = $DOM->saveXML();
-            error_log("______________-------____________________");
 
             $stmt = $this->mysqlConnection->prepare($sql);
-            error_log(print_r($stmt, true));
             if ($stmt) {
                 $stmt->bind_param("sssssssss",
                         $xml,
@@ -397,5 +409,5 @@ namespace com\detisa\omicrom {
 
     }
 
-    //FacturaDAO
+//FacturaDAO
 }//com\detisa\omicrom

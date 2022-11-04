@@ -110,10 +110,10 @@ if ($Palabras > 1) {
     // $Suc='*';
 }
 if (isset($Rfc)) {
-    
+
     if ($Rfc == "Diagnostico") {
         $FiltroRFC = " facturas.cfdi_xml like '%DCD160521680%' ";
-        $uso = " AND ";        
+        $uso = " AND ";
     } else if ($Rfc == "lcd") {
         $FiltroRFC = " facturas.cfdi_xml like '%LCD960909TW5%' ";
         $uso = " AND ";
@@ -142,7 +142,6 @@ if ($busca == '') {
             . "AND date(fecha) <= date('$FechaF') AND "
             . "fc.id='$busca' $uso $FiltroRFC";
 
-
     //   $cSql = "SELECT $Qry[campos] FROM $Qry[froms] LEFT JOIN med ON pgs.medico=med.medico WHERE idpgs='$busca'";
 } else {
 
@@ -163,7 +162,6 @@ if ($_REQUEST["Cliente"] <> '') {
 
     $Folio = cZeros(IncrementaFolio('fcfolio', $Suc), 5);
 
-
     $Fecha = date("Y-m-d H:i:s");
     $Sql = "INSERT INTO fc (cliente,fecha,status,folio,suc,usr,usocfdi) 
                     VALUES ('$_REQUEST[Cliente]','$Fecha','Abierta','$Folio','$Gcia','$Gusr','G03')";
@@ -180,25 +178,13 @@ if ($_REQUEST["Cliente"] <> '') {
 
 if ($op == "download") {
 
-    $sql = "SELECT facturas.pdf_format, facturas.uuid FROM facturas WHERE facturas.id_fc_fk = $busca";
-
-    $result = mysql_query($sql);
-    while ($myrowsel = mysql_fetch_array($result)) {
-        header("Content-Type: application/pdf");
-        header("Content-Disposition: inline; filename='$myrowsel[uuid].pdf'");
-        echo $myrowsel["pdf_format"];
-        exit();
-    }
+    header("Content-disposition: attachment; filename=" . $_REQUEST["Archivos"] . ".pdf");
+    header("Content-type: MIME");
+    readfile("archivos/" . $_REQUEST["Archivos"] . ".pdf");
 } elseif ($op == "xml") {
-
-    $sql = "SELECT cfdi_xml, uuid FROM facturas WHERE id_fc_fk = $busca";
-    $result = mysql_query($sql);
-    $rg = mysql_fetch_array($result);
-    $xml = $rg["cfdi_xml"];
-    error_log("Enviando XML");
-    header("Content-Type: application/xml");
-    header("Content-Disposition: attachment; filename=" . $rg["uuid"] . ".xml");
-    echo $xml;
+    header("Content-disposition: attachment; filename=" . $_REQUEST["Archivos"] . ".xml");
+    header("Content-type: MIME");
+    readfile("archivos/" . $_REQUEST["Archivos"] . ".xml");
 }
 
 //echo $cSql;
@@ -206,7 +192,7 @@ if ($op == "download") {
 $aCps = SPLIT(",", $Qry["campos"]);    // Es necesario para hacer el order by  desde lib;
 $aIzq = array("Envio", "-", "-", "Det", "-", "-", "Pdf", "-", "-", "Xml", "-", "-");    //Arreglo donde se meten los encabezados; Izquierdos
 $aDat = SPLIT(",", $Qry["edi"]);     //Arreglo donde llena el grid de datos
-$aDer = array("Forma de pago", "-", "-","Emisor", "-", "-"," ", "-", "-");    //Arreglo donde se meten los encabezados; Derechos;
+$aDer = array("Forma de pago", "-", "-", "Emisor", "-", "-", " ", "-", "-");    //Arreglo donde se meten los encabezados; Derechos;
 $tamPag = $Qry[tampag];
 
 require ("config.php");          //Parametros de colores;
@@ -237,7 +223,7 @@ require ("config.php");          //Parametros de colores;
         encabezados();
         menu($Gmenu, $Gusr);
         ?>
-            <script src="./controladores.js"></script>
+        <script src="./controladores.js"></script>
 
         <!--<label for="pacientej" class="letrap">Paciente :</label>
         <input style="width: 250px;" name="PacienteJ" type="text" id="pacientej" placeholder="Nombre del paciente" class="letrap"$
@@ -269,6 +255,7 @@ require ("config.php");          //Parametros de colores;
                 $("#FechaF").val("<?= $FechaF ?>");
             });
         </script>
+        
         <form name='form0' method='get' action="<?= $_SERVER['PHP_SELF'] ?>" onSubmit='return ValidaCampos();'>
             <table width="100%" class="letrap">
                 <tr>
@@ -300,7 +287,7 @@ require ("config.php");          //Parametros de colores;
                         CalculaPaginas();        #--------------------Calcual No.paginas-------------------------
 
                         $sql = $cSql . " ORDER BY " . $orden . " $Sort LIMIT " . $limitInf . "," . $tamPag;
-                        
+
                         $res = mysql_query($sql);
 
                         $Pos = strrpos($_SERVER[PHP_SELF], ".");
@@ -323,8 +310,8 @@ require ("config.php");          //Parametros de colores;
                             echo "<td align='center'><a class='edit' href='$cLink?busca=$rg[id]'><i class='fa fa-address-card fa-lg' aria-hidden='true'></i></a></td>";
 
                             if ($rg[status] == 'Timbrada') {
-                                echo "<td align='center'><a class='edit' href=javascript:winuni('?busca=$rg[id]&op=download')><i style='color:red' class='fa fa-file-pdf-o fa-lg' aria-hidden='true'></i></a></td>";
-                                echo "<td align='center'><a class='edit' href='?busca=$rg[id]&op=xml'><i class='fa fa-file-code-o fa-lg' aria-hidden='true'></i></a></td>";
+                                echo "<td align='center'><a class='edit' href='?busca=$rg[id]&op=download&Archivos=" . $rg["uuid"] . "'><i style='color:red' class='fa fa-file-pdf-o fa-lg' aria-hidden='true'></i></a></td>";
+                                echo "<td align='center'><a class='edit' href='?busca=$rg[id]&op=xml&Archivos=" . $rg["uuid"] . "'><i class='fa fa-file-code-o fa-lg' aria-hidden='true'></i></a></td>";
                             } else {
                                 echo "<td align='center' class='edit'><i style='color:red' class='fa fa-times' aria-hidden='true'></i></td>";
                                 echo "<td align='center' class='edit'><i style='color:red' class='fa fa-times' aria-hidden='true'></i> </td>";
@@ -336,7 +323,7 @@ require ("config.php");          //Parametros de colores;
 
                             $fp = mysql_query($fpA);
                             $Formpag = mysql_fetch_array($fp);
-                            $Formp=$Formpag[descripcion];
+                            $Formp = $Formpag[descripcion];
 
                             echo "<td align='left' class='letrap'>$Formp</td>";
 
