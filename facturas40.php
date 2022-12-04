@@ -5,7 +5,7 @@ session_start();
 //include_once ("auth.php");
 //include_once ("authconfig.php");
 //include_once ("check.php");
-
+date_default_timezone_set("America/Mexico_City");
 require("lib/lib.php");
 
 $link = conectarse();
@@ -255,7 +255,7 @@ require ("config.php");          //Parametros de colores;
                 $("#FechaF").val("<?= $FechaF ?>");
             });
         </script>
-        
+
         <form name='form0' method='get' action="<?= $_SERVER['PHP_SELF'] ?>" onSubmit='return ValidaCampos();'>
             <table width="100%" class="letrap">
                 <tr>
@@ -306,7 +306,7 @@ require ("config.php");          //Parametros de colores;
                             $Xml = $rg[uuid] . ".xml";
 
                             echo "<tr style='height:20px;' bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
-                            echo "<td align='center'><a class='edit' href=javascript:wingral('$uLink?busca=$rg[id]')><i class='fa fa-envelope fa-lg' $Color aria-hidden='true'></i></a></td>";
+                            echo "<td align='center'><a class='edit' href=javascript:wingral('facturasd.php?busca=$rg[id]')><i class='fa fa-envelope fa-lg' $Color aria-hidden='true'></i></a></td>";
                             echo "<td align='center'><a class='edit' href='$cLink?busca=$rg[id]'><i class='fa fa-address-card fa-lg' aria-hidden='true'></i></a></td>";
 
                             if ($rg[status] == 'Timbrada') {
@@ -331,8 +331,10 @@ require ("config.php");          //Parametros de colores;
                                 echo "<td align='center' class='letrap'>LCD</td>";
                             } elseif ($rg[emisor] == 'DCD160521680') {
                                 echo "<td align='center' class='letrap'>DCD</td>";
+                            } else if ($rg[emisor] == 'DDC210721PV9') {
+                                echo "<td align='center' class='letrap'>DDC</td>";
                             } else {
-                                echo "<td></td>";
+                                echo "<td align='center' class='letrap'></td>";
                             }
 
                             if ($rg[status] <> 'Cancelada') {

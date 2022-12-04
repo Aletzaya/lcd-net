@@ -225,7 +225,7 @@ require ("config.php");          //Parametros de colores;
                             $Xml = $rg[uuid] . ".xml";
 
                             echo "<tr style='height:20px;' bgcolor='$Fdo' onMouseOver=this.style.backgroundColor='$Gbarra';this.style.cursor='hand' onMouseOut=this.style.backgroundColor='$Fdo';>";
-                            echo "<td align='center'><a class='edit seleeccionar' href='facturas.php?busca=$rg[id]&Cliente=$rg[id]'>Seleccionar</a></td>";
+                            echo "<td align='center'><a class='edit seleeccionar' href='facturas40.php?busca=$rg[id]&Cliente=$rg[id]'>Seleccionar</a></td>";
                             echo "<td class='Seleccionar' align='center'><a class='edit' href='clientesfe.php?busca=$rg[id]'><i class='fa fa-pencil fa-2x' aria-hidden='true'></i></a></td>";
 
 

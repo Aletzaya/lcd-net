@@ -39,7 +39,7 @@ namespace com\detisa\omicrom {
 
         function __construct($folio) {
 
-            error_log("***** Cargando CFDI con folio " . $folio . " F4.0  *****");
+            error_log("***** Cargando CFDI con folio " . $folio . " F4.01  *****");
 
             $this->folio = $folio;
             $this->factory = ComprobanteFactory::getFactory($folio, "fc");
@@ -100,7 +100,7 @@ namespace com\detisa\omicrom {
          * @throws \com\detisa\omicrom\Exception
          */
         private function comprobante() {
-            $this->mysqlConnection->query("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+            //$this->mysqlConnection->query("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
             $sql = "SELECT 
                     fc.id, 
                     DATE_FORMAT(fc.fecha, '%Y-%m-%dT%H:%h:%i') Fecha, 
@@ -117,7 +117,10 @@ namespace com\detisa\omicrom {
                     fc.anio,fc.mes,fc.periodo
                     FROM fc JOIN cia ON cia.id = 1
                     WHERE fc.id = " . $this->folio;
+            error_log($sql);
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_array())) {
+                error_log("_______________________________________________________");
+                error_log("AQUI RS " . print_r($rs, true));
                 $this->comprobante = $this->factory->createComprobante($rs);
                 $this->Total = $rs["Total"];
                 if ($rs["anio"] > 2000) {
@@ -136,7 +139,7 @@ namespace com\detisa\omicrom {
         private function emisor() {
 
             $sql = "SELECT UPPER( cia.nombre ) "
-                    . "Nombre , rfc Rfc, clave_regimen RegimenFiscal FROM cia WHERE cia.id in (100,1)";
+                    . "Nombre , rfc Rfc, clave_regimen RegimenFiscal FROM cia WHERE cia.id in (100,1,101) AND facturacion='Si'";
             error_log($sql);
             if (($query = $this->mysqlConnection->query($sql)) && ($rs = $query->fetch_assoc())) {
                 $this->comprobante->setEmisor($this->factory->createComprobanteEmisor($rs));
@@ -251,7 +254,7 @@ namespace com\detisa\omicrom {
                     if (abs($difference) > 0.001) {
                         error_log("There is a difference " . $difference . " Desc " . $rs["Descripcion"]);
                         $this->comprobante->setTotal(number_format($Total, 2, ".", ""));
-                        $this->comprobante->setSubTotal(number_format($subTotal, 2, ".", ""));
+//                        $this->comprobante->setSubTotal(number_format($subTotal, 2, ".", ""));
                     } else {
                         error_log("Equals totals");
                     }

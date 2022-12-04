@@ -27,7 +27,7 @@ $CpoA = mysql_query("SELECT fc.fecha,fc.cliente,fc.cantidad,fc.iva,fc.importe,fc
 
 $Cpo = mysql_fetch_array($CpoA);
 
-$Correoadm=$Cpo[correoadm];
+$Correoadm = $Cpo[correoadm];
 
 $Pdf = "fae/archivos/" . $Cpo[uuid] . ".pdf";
 
@@ -79,7 +79,6 @@ if ($busca == 'NUEVO') {
         //Set the subject line
         $mail->Subject = "Factura electronica";
 
-
         $mail->Body = "Estimado cliente, le estamos enviando por este medio la factura electronica y al mismo tiempo nos reiteramos a sus ordenes para cualquier aclaracion al respecto, gracias por su preferencia.<br> ";
 
         //Replace the plain text body with one created manually
@@ -92,7 +91,7 @@ if ($busca == 'NUEVO') {
         //Set who the message is to be sent to
         $mail->AddAddress($_REQUEST[Correo], 'Servicios');
 
-        if($Correoadm<>''){
+        if ($Correoadm <> '') {
             $mail->AddAddress($Correoadm, 'Administracion');
         }
 
@@ -113,7 +112,8 @@ if ($busca == 'NUEVO') {
         $myrowsel = mysql_fetch_array($result);
         $receptor = $myrowsel['name'] . " (" . $myrowsel['rfc'] . ")";
         // Read attachments
-        $mail->AddStringAttachment($myrowsel['pdf_format'], $Cpo['uuid'] . ".pdf", "base64", "application/pdf");
+        $mail->AddAttachment("archivos/" . $Cpo['uuid'] . ".pdf", $Cpo['uuid'] . ".pdf", 'base64', 'application/octet-stream');
+        //$mail->AddStringAttachment($myrowsel['pdf_format'], $Cpo['uuid'] . ".pdf", "base64", "application/pdf");
         $mail->AddStringAttachment($myrowsel['cfdi_xml'], $Cpo['uuid'] . ".xml", "base64", "application/xml");
 
         $mail->ContentType = 'multipart/mixed';
@@ -165,7 +165,6 @@ if ($busca == 'NUEVO') {
 
 $Titulo = "Edita factura [$busca]";
 
-
 $lBd = false;
 
 require ("config.php");
@@ -174,20 +173,20 @@ require ("config.php");
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-    <meta charset="UTF-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>.:: Envio Factura ::.</title>
-        <link href="estilos.css?var=1.2" rel="stylesheet" type="text/css"/>
-        <link href="menu.css?var=1.2" rel="stylesheet" type="text/css" />
-        <script language="JavaScript" src="js/jquery-1.5.1.min.js"></script>
-        <script language="JavaScript" src="js/jquery-ui-1.8.13.custom.min.js"></script>
-        <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.13.custom.css" rel="stylesheet" />
-        <link rel='icon' href='favicon.ico' type='image/x-icon' />
-        <script src="js/jquery-1.8.2.min.js"></script>
-        <script src="jquery-ui/jquery-ui.min.js"></script>
-        <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <meta charset="UTF-8">
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <title>.:: Envio Factura ::.</title>
+            <link href="estilos.css?var=1.2" rel="stylesheet" type="text/css"/>
+            <link href="menu.css?var=1.2" rel="stylesheet" type="text/css" />
+            <script language="JavaScript" src="js/jquery-1.5.1.min.js"></script>
+            <script language="JavaScript" src="js/jquery-ui-1.8.13.custom.min.js"></script>
+            <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.13.custom.css" rel="stylesheet" />
+            <link rel='icon' href='favicon.ico' type='image/x-icon' />
+            <script src="js/jquery-1.8.2.min.js"></script>
+            <script src="jquery-ui/jquery-ui.min.js"></script>
+            <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+            <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     </head>
 
     <title>
@@ -382,12 +381,13 @@ function Totaliza($busca) { //busca es idnvo de medt y cVarVal es id de la entra
         $Cnt = $Ddd[cantidad];
         $Importe = $Ddd[PrecioSinIva];
         $Iva = round($Ddd[PrecioSinIva] * ($Cia[iva] / 100), 2);
-        $Total = $Importe+$Iva;
+        $Total = $Importe + $Iva;
         //$Ddd[ImporteTotal];
     }
 
     //$nImporte = $Total - ($Iva + $Ieps);	//Con esto lo obligo a que me cuadre;
     $lUp = mysql_query("UPDATE fc SET cantidad=$Cnt,importe = $Importe, iva=$Iva, total= $Total WHERE id=$busca");
 }
+
 mysql_close();
 ?>

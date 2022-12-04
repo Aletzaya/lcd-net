@@ -13,7 +13,7 @@
 require_once ("cfdi/com/softcoatl/cfdi/utils/NumericalCurrencyConverter.php");
 require_once ("cfdi/com/softcoatl/cfdi/utils/Currency.php");
 require_once ("cfdi/com/softcoatl/cfdi/utils/SpanishNumbers.php");
-require_once ("tcpdf/tcpdf.php");
+require_once ("tcpdf2/tcpdf.php");
 require_once ("PDFTYPE.php");
 
 use com\softcoatl\cfdi\utils\NumericalCurrencyConverter;
@@ -309,7 +309,6 @@ class CUSTOM_PDF extends TCPDF {
                 . "<tr><td><b>Forma de Pago</b></td><td colspan=\"3\"><b>" . $this->Comprobante->getFormaPago() . "</b> - " . $this->decodeFormaPago($this->Comprobante->getFormaPago()) . "</td></tr>"
                 . "<tr><td><b>Método de Pago</b></td><td colspan=\"3\"><b>" . $this->Comprobante->getMetodoPago() . "</b> - " . $this->decodeMetodoPago($this->Comprobante->getMetodoPago()) . "</td></tr>"
                 . ( empty($this->Comprobante->getCondicionesDePago()) ? "" : "<tr><td><b>Condiciones</b></td><td colspan=\"3\">" . $this->Comprobante->getCondicionesDePago() . "</td></tr>" )
-                . "<tr><td><b>Versión CFDI</b></td><td colspan=\"3\">" . $this->Comprobante->getVersion() . "</td></tr>"
                 . "<tr><td><b>Versión CFDI</b></td><td colspan=\"3\">" . $this->Comprobante->getVersion() . "</td></tr>"
                 . "</table>"
                 . "</td>"

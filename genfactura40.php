@@ -81,23 +81,39 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
 
     $cSql = "UPDATE fc JOIN clif ON fc.cliente = clif.id SET fc.usocfdi = '$_REQUEST[Usocfdi]', fc.formadepago='$_REQUEST[Formadepago]',
              fc.metododepago = '$_REQUEST[Metododepago]', fc.observaciones = '$_REQUEST[Observaciones]', clif.enviarcorreo='$_REQUEST[Enviarcorreo]',
-             clif.municipio='$_REQUEST[Municipio]', clif.codigo='$_REQUEST[Codigo]',clif.correo = '$_REQUEST[Correo]'    
+             clif.municipio='$_REQUEST[Municipio]', clif.codigo='$_REQUEST[Codigo]',clif.correo = '$_REQUEST[Correo]',
+             anio = '$_REQUEST[Anio]',mes='$_REQUEST[Mes]',periodo='$_REQUEST[Periodo]'
              WHERE fc.id='$busca'";
     if (!mysql_query($cSql)) {
         $Archivo = 'FC';
         die('<div align="center"><p>&nbsp;</p>Error critico[paso 1]<br>el proceso <b>NO</b> se finaliz&oacute; correctamente, favor de informar al <b>departamento de sistemas</b><br><b> $Archivo ' . mysql_error() . '</b><br> favor de dar click en la flecha <a href=menu.php?op=102><img src=lib/regresa.jpg border=0></a> para regresar</div>');
     } else {
         $Msj = "Cliente facturador actualizado con Exito!";
-        header("Location: genfactura.php?busca=$_REQUEST[busca]&Msj=$Msj");
+        header("Location: genfactura40.php?busca=$_REQUEST[busca]&Msj=$Msj");
     }
 } elseif ($_REQUEST["Opcion"] === 'Genera') {
-
     if ($_REQUEST["Certificados"] === "LCD") {
-        mysql_query("UPDATE cia SET facturacion='Si' WHERE id=1");
+        mysql_query("UPDATE cia SET facturacion='No' WHERE id=101");
         mysql_query("UPDATE cia SET facturacion='No' WHERE id=100");
+        mysql_query("UPDATE cia SET facturacion='Si' WHERE id=1");
+    } else if ($_REQUEST["Certificados"] === "DULAB") {
+        mysql_query("UPDATE cia SET facturacion='No' WHERE id=1");
+        mysql_query("UPDATE cia SET facturacion='No' WHERE id=100");
+        mysql_query("UPDATE cia SET facturacion='Si' WHERE id=101");
     } else {
         mysql_query("UPDATE cia SET facturacion='No' WHERE id=1");
+        mysql_query("UPDATE cia SET facturacion='No' WHERE id=101");
         mysql_query("UPDATE cia SET facturacion='Si' WHERE id=100");
+    }
+    if ($_REQUEST["Certificados"] === "LCD") {
+        $keyfile = "certificado/key.pem";
+        $cerfile = "certificado/cer.pem";
+    } else if ($_REQUEST["Certificados"] === "DULAB") {
+        $keyfile = "certificado3/key.pem";
+        $cerfile = "certificado3/cer.pem";
+    } else {
+        $keyfile = "certificado2/key.pem";
+        $cerfile = "certificado2/cer.pem";
     }
 
     /*     * ********************************************************************************************************************************************************* */
@@ -109,14 +125,6 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
         die('<div align="center"><p>&nbsp;</p><font color="#99000">Error critico</font><b></b><br>El comprobante no tiene conceptos, no es posible timbrar un comprobante sin conceptos. Favor de verificar.<br><b>' . mysql_error() . '</b><br> favor de dar click en la flecha &nbsp <a class=nombre_cliente href=' . $_SERVER["PHP_SELF"] . '><img src=lib/regresa.jpg border=0></a> para regresar</div>');
     }
 
-    if ($_REQUEST["Certificados"] === "LCD") {
-        $keyfile = "certificado/key.pem";
-        $cerfile = "certificado/cer.pem";
-    } else {
-        $keyfile = "certificado2/key.pem";
-        $cerfile = "certificado2/cer.pem";
-    }
-    
     if (count($facturaDetisa->getComprobante()->getConceptos()->getConcepto()) == 0) {
         $Msj = "El comprobante no tiene conceptos, no es posible timbrar un comprobante sin conceptos. Favor de verificar";
     } else if (!file_exists($keyfile) || !file_exists($cerfile)) {
@@ -140,7 +148,7 @@ if ($queryParameters['Boton'] == 'Guardar estos cambios') {
                 $service = new com\detifac\services\TimbradoService();
                 $xmlCFDI = $service->doin($facturaDetisa->getComprobante(), $csd);
                 $Msj = $service->getError();
-                $facturaDetisa->getComprobante()->asXML()->save("/home/omicrom/xml/prbCP.xml");
+                $facturaDetisa->getComprobante()->asXML()->save("cfdi40.xml");
                 try {
                     if ($xmlCFDI) {
                         $comprobanteTimbrado = (new ComprobanteResolver())->resolve($xmlCFDI);
@@ -197,13 +205,19 @@ $Gmenu = $_SESSION["Usr"][5];
                         <?php
                         $HeA = mysql_query("SELECT fc.id,fc.cliente,clif.nombre,clif.direccion,clif.rfc,clif.codigo,
          clif.correo,fc.fecha,clif.enviarcorreo,fc.usocfdi,clif.municipio,fc.total,fc.iva,
-         fc.formadepago,fc.importe,fc.observaciones,fc.metododepago
+         fc.formadepago,fc.importe,fc.observaciones,fc.metododepago,fc.anio,fc.mes,fc.periodo
          FROM fc LEFT JOIN clif ON fc.cliente=clif.id
          WHERE fc.id='$busca'");
 
                         $He = mysql_fetch_array($HeA);
 //$Nom = utf8_encode($He[nombre]);
                         ?>  
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $("#Mes").val("<?= $He["mes"] ?>");
+                                $("#Periodo").val("<?= $He["periodo"] ?>");
+                            });
+                        </script>
                         <table bgcolor="#D5D8DC" width='60%' border='0' align='center' cellpadding='0' cellspacing='0' class='letrap' style='border:#566573 1px solid;'>
                             <tr>
                                 <td colspan="2" align="center" bgcolor="#E59866"><h2>Verificar datos del cliente</h2></td>
@@ -296,6 +310,41 @@ $Gmenu = $_SESSION["Usr"][5];
                                     }
                                     ?>
                                 </td></tr>
+                            <?php
+                            if ($He[rfc] === "XAXX010101000") {
+                                ?>
+                                <tr style="height: 25px;">
+                                    <td style="text-align: center" colspan="2">
+                                        Año :<input type="number" name="Anio" class='letrap' value="<?= date("Y") ?>">  
+                                        Mes :
+                                        <select name="Mes" id="Mes" class='letrap'>
+                                            <?php
+                                            $Meses = "SELECT * FROM cfdi_meses";
+                                            $RsM = mysql_query($Meses);
+                                            while ($rsMes = mysql_fetch_array($RsM)) {
+                                                ?>
+                                                <option value="<?= $rsMes["clave"] ?>"><?= $rsMes["clave"] ?> .- <?= $rsMes["descripcion"] ?></option>
+                                                <?php
+                                            }
+                                            ?>
+                                        </select>
+                                        Periodo:
+                                        <select name="Periodo" id="Periodo" class='letrap'>
+                                            <?php
+                                            $Meses = "SELECT * FROM cfdi_periodicidad";
+                                            $RsM = mysql_query($Meses);
+                                            while ($rsMes = mysql_fetch_array($RsM)) {
+                                                ?>
+                                                <option value="<?= $rsMes["clave"] ?>"><?= $rsMes["clave"] ?> .- <?= $rsMes["descripcion"] ?></option>
+                                                <?php
+                                            }
+                                            ?>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
                             <tr style="height: 25px;">
                                 <td align='center' colspan="2">
                                     <input type='submit' style='background:#618fa9; color:#ffffff;font-weight:bold;' name='Boton' value='Guardar estos cambios'>
@@ -304,7 +353,7 @@ $Gmenu = $_SESSION["Usr"][5];
                         </table>
                         <input type='hidden' name='op' value='ag'>
                         <input type='hidden' name='Cliente' value='<?= $He[cliente] ?>'>
-                        <table width="100%"><tr><td align="right"><a href='facturas.php' class='content5' ><i class='fa fa-reply fa-2x' aria-hidden='true'></i> Regresar </a></td></tr></table>
+                        <table width="100%"><tr><td align="right"><a href='facturas40.php' class='content5' ><i class='fa fa-reply fa-2x' aria-hidden='true'></i> Regresar </a></td></tr></table>
                     </form>
 
                     <?php
@@ -372,6 +421,7 @@ $Gmenu = $_SESSION["Usr"][5];
                         <p align='center'>
                             <input type='submit' style='background:#618fa9; color:#ffffff;font-weight:bold;' name='Certificados' value='LCD'>
                             <input type='submit' style='background:#618fa9; color:#ffffff;font-weight:bold;' name='Certificados' value='Diagnostico'>
+                            <input type='submit'style='background:#618fa9; color:#ffffff;font-weight:bold;' name='Certificados' value='DULAB'>
                         </p>
                     </form>
                 </td>

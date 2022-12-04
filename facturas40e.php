@@ -341,7 +341,7 @@ require ("config.php");          //Parametros de colores;
                                     <input type="hidden" name="busca" value="<?= $busca ?>"></input>
                                 </form>
                             </td>
-                            <td valign="middle" align="right"><a href="facturas.php" class="content5" ><i class="fa fa-reply fa-2x" aria-hidden="true"></i> Regresar </a></td><td width="1%"></td>
+                            <td valign="middle" align="right"><a href="facturas40.php" class="content5" ><i class="fa fa-reply fa-2x" aria-hidden="true"></i> Regresar </a></td><td width="1%"></td>
                         </tr>
                         <tr height='25px'>
                             <td valign="bottom" align="left" colspan="4" width="70%">
